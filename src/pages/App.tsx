@@ -1,5 +1,6 @@
 // src/App.tsx
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import {
 	Button,
 	Container,
@@ -35,7 +36,7 @@ const App: React.FC = () => {
 			}}
 		>
 			<Container maxWidth="sm" sx={{ width: "100%", maxWidth: "400px" }}>
-				<Stack spacing={1} p={4} bgcolor="white" borderRadius={2} boxShadow={3}>
+				<Stack spacing={2} p={4} bgcolor="white" borderRadius={2} boxShadow={3}>
 					<Typography
 						variant="h4"
 						align="center"
