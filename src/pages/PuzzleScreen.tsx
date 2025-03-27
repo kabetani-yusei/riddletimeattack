@@ -125,7 +125,7 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 						</Box>
 						<Box mt={5} display="flex" justifyContent="center">
 							<Button variant="contained" onClick={handlePass}>
-								パス (計5分追加)
+								パス (5分追加)
 							</Button>
 						</Box>
 					</Box>
