@@ -1,5 +1,5 @@
 // src/constants/riddleSets/set1.ts
-import { ImageSet } from "../types";
+import type { ImageSet } from "../types";
 
 export const setA: ImageSet = {
 	title: "Set A",
