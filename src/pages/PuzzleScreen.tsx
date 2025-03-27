@@ -1,6 +1,7 @@
 // src/PuzzleScreen.tsx
-import React, { useState } from "react";
-import { Box, Button, Card, CardMedia, Stack, Typography } from "@mui/material";
+import type React from "react";
+import { useState } from "react";
+import { Box, Button, Card, CardMedia, Typography } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { riddleSets } from "../utils/riddleSets";
 import Countdown from "../components/Countdown";
@@ -111,7 +112,7 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 						{/* パスボタン：解答エリアとの間に余白を設けて下部に配置 */}
 						<Box mt={2} display="flex" justifyContent="center">
 							<Button variant="contained" onClick={handlePass}>
-								{`パス (計5分追加)`}
+								パス (計5分追加)
 							</Button>
 						</Box>
 					</Box>

@@ -1,5 +1,5 @@
 // src/ResultScreen.tsx
-import React from "react";
+import type React from "react";
 import { Box, Button, Typography } from "@mui/material";
 
 interface ResultScreenProps {
@@ -34,7 +34,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 		].join("\n");
 
 		window.open(
-			"https://twitter.com/intent/tweet?text=" + encodeURIComponent(tweetText),
+			`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`,
 			"_blank",
 		);
 	};

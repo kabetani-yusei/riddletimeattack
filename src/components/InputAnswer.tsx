@@ -1,5 +1,6 @@
 // src/components/InputAnswer.tsx
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { TextField, Button, Box } from "@mui/material";
 
 interface Props {

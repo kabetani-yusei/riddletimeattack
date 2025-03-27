@@ -1,5 +1,6 @@
 // src/components/Countdown.tsx
-import React, { useEffect, useState } from "react";
+import type React from "react";
+import { useEffect, useState } from "react";
 import { Typography, Box } from "@mui/material";
 
 interface Props {

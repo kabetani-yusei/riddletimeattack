@@ -1,5 +1,6 @@
 // src/components/Stopwatch.tsx
-import React, { useEffect, useState, useRef } from "react";
+import type React from "react";
+import { useEffect, useState, useRef } from "react";
 import { Typography } from "@mui/material";
 
 interface Props {
@@ -33,7 +34,7 @@ const Stopwatch: React.FC<Props> = ({
 		return () => {
 			if (intervalRef.current) clearInterval(intervalRef.current);
 		};
-	}, [running]);
+	}, [running, elapsed, onTimeUpdate]);
 
 	// 追加時間の更新があったとき、前回との差分だけ加算する
 	useEffect(() => {
