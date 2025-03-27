@@ -1,56 +1,18 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="Riddle Time Attack アプリケーション" />
     <title>Riddle Time Attack</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div id="countdown" style="font-size: 2em; color: red; display: none;"></div>
-    <h1>Riddle Time Attack</h1>
-
-    <div id="imageSetSelectorContainer" class="input-container">
-        <label for="imageSetSelector">謎セットを選択:</label>
-        <select id="imageSetSelector">
-            <option value="set1">セットA</option>
-            <option value="set2">セットB</option>
-        </select>
-    </div>
-
-    <div id="YourResult" class="hidden" style="font-size: 2em; text-align: center; color: red;">
-        <div id="imageSetName"></div>
-        <p>Your Result</p>
-    </div>
-    
-    <div id="stopwatch-container" class="hidden">
-        <div id="stopwatch">00:00:00.00</div>
-        <div id="message" style="font-size: 1.2em; color: red; margin-left: 10px; opacity: 0; transition: opacity 0.5s ease-in-out;"></div>
-        <div id="passCounter">パス: 0</div>
-    </div>
-    
-    <div class="input-container hidden" id="inputContainer">
-        <img src="images/image0.png" alt="説明画像" class="input-image" id="dynamicImage"> <!-- 初期画像 -->
-        <div class="input-fields">
-            <input type="text" id="userInput" placeholder="ひらがなで入力">
-            <button id="submitButton" onclick="submitAnswer()">解答</button>
-        </div>
-    </div>
-
-    <div id="intro" style="font-size: 1em; text-align: center; color: black;">
-        <p>全10問の謎を解ききるまでのタイムを競います</p>
-        <p>答えは全てひらがなで入力してください</p>
-        <p>謎がわからない場合その謎をパスできますがタイムに5分のペナルティがつきます</p>
-    </div>
-
-    <div class="controls">
-        <button id="startButton" onclick="startStopwatch()">スタート</button>
-        <button id="stopButton" class="hidden" onclick="stopStopwatch()">ストップ</button>
-        <button id="resetButton" class="hidden" onclick="resetStopwatch()">リセット</button>
-        <button id="passButton" class="hidden" onclick="incrementPass()">パス</button>
-        <button id="linkButton" class="hidden" onclick="jamptolink()">結果送信用リンク(この結果画面のみSNS投稿OKです)</button>
-    </div>
-
-    <script src="script.js"></script>
-</body>
+  </head>
+  <body>
+    <noscript>
+      JavaScript が無効になっています。このアプリケーションを実行するには JavaScript を有効にしてください。
+    </noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
