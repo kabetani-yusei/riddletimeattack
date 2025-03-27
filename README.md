@@ -1,4 +1,6 @@
-# [名古屋大学謎解きサークルリデルタ](https://x.com/NU_nazo_create)　謎解きタイムアタック
+# 名古屋大学謎解きサークルリデルタ謎解きタイムアタック
+
+## [現在のバージョンのURL](https://kabetani-yusei.github.io/riddletimeattack/)
 
 ## 初期バージョン: [Riddle Time Attack](https://ta-toru.github.io/riddletimeattack/)
 
