@@ -1,4 +1,3 @@
-// src/PuzzleScreen.tsx
 import type React from "react";
 import { useState } from "react";
 import { Box, Button, Card, CardMedia, Typography } from "@mui/material";
@@ -28,8 +27,9 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
 	const [showCountdown, setShowCountdown] = useState(true);
 	const [additionalTime, setAdditionalTime] = useState(0);
-	// ストップウォッチの実行状態を管理する状態
+
 	const [isRunning, setIsRunning] = useState(false);
+	const [shouldGoToResult, setShouldGoToResult] = useState(false);
 
 	const currentSetTitle = selectedSet === "setA" ? "A" : "B";
 
@@ -46,9 +46,19 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 	};
 
 	const handlePass = () => {
+		const isLast = currentImageIndex + 1 >= currentImageSet.images.length;
 		setPassCount((prev) => prev + 1);
 		setAdditionalTime((prev) => prev + 300000); // 5分追加
-		showNextImage();
+
+		if (isLast) {
+			// 追加時間が適用されるのを待つために短い遅延を入れる
+			setTimeout(() => {
+				setIsRunning(false); // Stopwatch 停止
+				setShouldGoToResult(true); // Stopwatch 側に画面遷移を託す
+			}, 50);
+		} else {
+			showNextImage();
+		}
 	};
 
 	const showNextImage = () => {
@@ -56,6 +66,7 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 		if (nextIndex < currentImageSet.images.length) {
 			setCurrentImageIndex(nextIndex);
 		} else {
+			setIsRunning(false);
 			setPage("result");
 		}
 	};
@@ -90,10 +101,14 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 								running={isRunning}
 								additionalTime={additionalTime}
 								onTimeUpdate={setElapsedTime}
+								onComplete={() => {
+									if (shouldGoToResult) {
+										setPage("result");
+									}
+								}}
 							/>
 						</Box>
 					</Box>
-					{/* 画像サイズを制限し中央寄せ */}
 					<Card sx={{ maxWidth: 300, mx: "auto", mb: 2 }}>
 						<CardMedia
 							component="img"
@@ -104,13 +119,11 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 							}}
 						/>
 					</Card>
-					{/* 解答入力エリア */}
 					<Box mt={2}>
 						<Box display="flex" justifyContent="center" alignItems="center">
 							<InputAnswer onSubmit={handleAnswerSubmit} />
 						</Box>
-						{/* パスボタン：解答エリアとの間に余白を設けて下部に配置 */}
-						<Box mt={2} display="flex" justifyContent="center">
+						<Box mt={5} display="flex" justifyContent="center">
 							<Button variant="contained" onClick={handlePass}>
 								パス (計5分追加)
 							</Button>

@@ -1,24 +1,40 @@
-// src/components/Stopwatch.tsx
 import type React from "react";
 import { useEffect, useState, useRef } from "react";
 import { Typography } from "@mui/material";
 
 interface Props {
 	running: boolean;
-	additionalTime?: number; // パス時の追加時間（ミリ秒）
+	additionalTime?: number;
 	onTimeUpdate?: (elapsed: number) => void;
+	onComplete?: () => void;
 }
 
 const Stopwatch: React.FC<Props> = ({
 	running,
 	additionalTime = 0,
 	onTimeUpdate,
+	onComplete,
 }) => {
 	const [elapsed, setElapsed] = useState(0);
 	const startTimeRef = useRef<number | null>(null);
 	const intervalRef = useRef<number | null>(null);
 	// これまでに加算した追加時間を記録する ref
 	const lastAdditionalRef = useRef(0);
+
+	useEffect(() => {
+		// 追加時間の更新があったとき、前回との差分だけ加算する
+		const delta = additionalTime - lastAdditionalRef.current;
+		if (delta > 0) {
+			setElapsed((prev) => {
+				const newElapsed = prev + delta;
+				if (startTimeRef.current) {
+					startTimeRef.current = Date.now() - newElapsed;
+				}
+				return newElapsed;
+			});
+			lastAdditionalRef.current = additionalTime;
+		}
+	}, [additionalTime]);
 
 	useEffect(() => {
 		if (running) {
@@ -36,20 +52,13 @@ const Stopwatch: React.FC<Props> = ({
 		};
 	}, [running, elapsed, onTimeUpdate]);
 
-	// 追加時間の更新があったとき、前回との差分だけ加算する
 	useEffect(() => {
-		const delta = additionalTime - lastAdditionalRef.current;
-		if (delta > 0) {
-			setElapsed((prev) => {
-				const newElapsed = prev + delta;
-				if (startTimeRef.current) {
-					startTimeRef.current = Date.now() - newElapsed;
-				}
-				return newElapsed;
-			});
-			lastAdditionalRef.current = additionalTime;
+		if (!running && intervalRef.current) {
+			clearInterval(intervalRef.current);
+			intervalRef.current = null;
+			if (onComplete) onComplete();
 		}
-	}, [additionalTime]);
+	}, [running, onComplete]);
 
 	const formatTime = (ms: number) => {
 		const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
