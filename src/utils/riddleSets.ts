@@ -1,8 +1,8 @@
 // src/constants/riddleSets.ts
-import { setA } from './setList/setA';
-import { setB } from './setList/setB';
+import { setA } from "./setList/setA";
+import { setB } from "./setList/setB";
 
 export const riddleSets = {
-    setA,
-    setB,
+	setA,
+	setB,
 };

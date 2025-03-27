@@ -1,15 +1,18 @@
-// src/main.tsx
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
+import React from "react";
+// ここを変更：react-dom/clientからcreateRootをインポート
+import { createRoot } from "react-dom/client";
+import App from "./pages/App";
+import CssBaseline from "@mui/material/CssBaseline";
 
-const rootElement = document.getElementById('root');
+const rootElement = document.getElementById("root");
 if (!rootElement) {
-  throw new Error('No root element found');
+	throw new Error("No root element found");
 }
-const root = ReactDOM.createRoot(rootElement);
+const root = createRoot(rootElement);
+
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+	<React.StrictMode>
+		<CssBaseline />
+		<App />
+	</React.StrictMode>,
 );
