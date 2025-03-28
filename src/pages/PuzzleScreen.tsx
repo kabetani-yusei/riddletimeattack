@@ -2,14 +2,14 @@ import type React from "react";
 import { useState } from "react";
 import { Box, Button, Card, CardMedia, Typography } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import { riddleSets } from "../utils/riddleSets";
 import Countdown from "../components/Countdown";
 import Stopwatch from "../components/Stopwatch";
 import InputAnswer from "../components/InputAnswer";
 import { blue, grey } from "@mui/material/colors";
+import type { RiddleSetsType } from "../utils/types";
 
 interface PuzzleScreenProps {
-	selectedSet: "setA" | "setB";
+	content: RiddleSetsType;
 	setElapsedTime: React.Dispatch<React.SetStateAction<number>>;
 	passCount: number;
 	setPassCount: React.Dispatch<React.SetStateAction<number>>;
@@ -17,13 +17,12 @@ interface PuzzleScreenProps {
 }
 
 const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
-	selectedSet,
+	content,
 	setElapsedTime,
 	passCount,
 	setPassCount,
 	setPage,
 }) => {
-	const currentImageSet = riddleSets[selectedSet];
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
 	const [showCountdown, setShowCountdown] = useState(true);
 	const [additionalTime, setAdditionalTime] = useState(0);
@@ -31,22 +30,20 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 	const [isRunning, setIsRunning] = useState(false);
 	const [shouldGoToResult, setShouldGoToResult] = useState(false);
 
-	const currentSetTitle = selectedSet === "setA" ? "A" : "B";
-
 	const onCountdownComplete = () => {
 		setShowCountdown(false);
 		setIsRunning(true);
 	};
 
 	const handleAnswerSubmit = (answer: string) => {
-		const correctAnswer = currentImageSet.answers[currentImageIndex];
+		const correctAnswer = content.answers[currentImageIndex];
 		if (answer === correctAnswer) {
 			showNextImage();
 		}
 	};
 
 	const handlePass = () => {
-		const isLast = currentImageIndex + 1 >= currentImageSet.images.length;
+		const isLast = currentImageIndex + 1 >= content.images.length;
 		setPassCount((prev) => prev + 1);
 		setAdditionalTime((prev) => prev + 300000); // 5分追加
 
@@ -63,11 +60,8 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 
 	const showNextImage = () => {
 		const nextIndex = currentImageIndex + 1;
-		if (nextIndex < currentImageSet.images.length) {
+		if (nextIndex < content.images.length) {
 			setCurrentImageIndex(nextIndex);
-		} else {
-			setIsRunning(false);
-			setPage("result");
 		}
 	};
 
@@ -78,7 +72,7 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 			) : (
 				<>
 					<Typography variant="h6" align="center" mb={2}>
-						{`【セット ${currentSetTitle} 】第 ${currentImageIndex + 1} 問目`}
+						{`【${content.title}】第 ${currentImageIndex + 1} 問目`}
 						<br />
 						{`パス回数：${passCount}`}
 					</Typography>
@@ -115,7 +109,7 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 					<Card sx={{ maxWidth: 300, mx: "auto", mb: 2 }}>
 						<CardMedia
 							component="img"
-							image={currentImageSet.images[currentImageIndex]}
+							image={content.images[currentImageIndex]}
 							sx={{
 								maxHeight: 300,
 								objectFit: "contain",

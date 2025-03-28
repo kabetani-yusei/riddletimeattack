@@ -1,5 +1,5 @@
 // src/constants/types.ts
-export interface ImageSet {
+export interface RiddleSetsType {
 	title: string;
 	images: string[];
 	answers: string[];

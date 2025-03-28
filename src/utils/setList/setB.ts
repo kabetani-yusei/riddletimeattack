@@ -1,5 +1,5 @@
 // src/constants/riddleSets/set2.ts
-import type { ImageSet } from "../types";
+import type { RiddleSetsType } from "../types";
 
 import image1 from "../../assets/images/setB/image1.png";
 import image2 from "../../assets/images/setB/image2.png";
@@ -12,8 +12,8 @@ import image8 from "../../assets/images/setB/image8.png";
 import image9 from "../../assets/images/setB/image9.png";
 import image10 from "../../assets/images/setB/image10.png";
 
-export const setB: ImageSet = {
-	title: "Set B",
+export const setB: RiddleSetsType = {
+	title: "セットB",
 	images: [
 		image1,
 		image2,

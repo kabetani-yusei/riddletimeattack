@@ -1,30 +1,53 @@
 // src/ResultScreen.tsx
 import type React from "react";
 import { Box, Button, Typography } from "@mui/material";
+import { useEffect, useRef } from "react";
+import { sendToGAS } from "../hooks/useSendToGAS";
+
+const formatTime = (ms: number) => {
+	const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
+	const minutes = Math.floor((ms / (1000 * 60)) % 60);
+	const seconds = Math.floor((ms / 1000) % 60);
+	const milliseconds = Math.floor((ms % 1000) / 10);
+	return `${String(hours).padStart(2, "0")}時間${String(minutes).padStart(2, "0")}分${String(seconds).padStart(2, "0")}秒${String(milliseconds).padStart(2, "0")}`;
+};
 
 interface ResultScreenProps {
-	imageSetName: string;
+	selectedSetTitle: string;
 	elapsedTime: number;
+	userName: string;
 	passCount: number;
 }
 
 const ResultScreen: React.FC<ResultScreenProps> = ({
-	imageSetName,
-	elapsedTime,
-	passCount,
+  selectedSetTitle,
+  elapsedTime,
+  userName,
+  passCount,
 }) => {
-	const formatTime = (ms: number) => {
-		const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
-		const minutes = Math.floor((ms / (1000 * 60)) % 60);
-		const seconds = Math.floor((ms / 1000) % 60);
-		const milliseconds = Math.floor((ms % 1000) / 10);
-		return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.${String(milliseconds).padStart(2, "0")}`;
-	};
+  const sentRef = useRef(false);
+
+  useEffect(() => {
+    const postDataToGAS = async () => {
+      const postData = {
+        selectedSetTitle,
+        userName,
+        clearTime: formatTime(elapsedTime),
+        passCount,
+      };
+      await sendToGAS(postData);
+    };
+
+    if (!sentRef.current) {
+      postDataToGAS();
+      sentRef.current = true;
+    }
+  }, [selectedSetTitle, userName, elapsedTime, passCount]);
 
 	const handleTweet = () => {
 		const tweetText = [
 			"#例外謎 に参加したあなたは「Riddle Time Attack」を先行体験した！",
-			`セット：${imageSetName}`,
+			`セット：${selectedSetTitle}`,
 			`クリアタイム：${formatTime(elapsedTime)}`,
 			`パス回数：${passCount}回`,
 			"でした！！",
@@ -43,9 +66,9 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 		<Box textAlign="center" mt={0}>
 			<Box textAlign="center" mt={1}>
 				<Typography variant="body1" sx={{ fontSize: "1.2rem" }}>
-					{`結果 (${imageSetName})`}
+					{`結果 (${selectedSetTitle})`}
 				</Typography>
-				<Box mt={2} textAlign="left" sx={{ mx: "auto", maxWidth: 250 }}>
+				<Box mt={2} textAlign="left" sx={{ mx: "auto", maxWidth: 300 }}>
 					<Typography variant="body1" sx={{ fontSize: "1.0rem" }}>
 						{`・クリアタイム：${formatTime(elapsedTime)}`}
 					</Typography>
