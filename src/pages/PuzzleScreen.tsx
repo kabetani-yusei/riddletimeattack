@@ -72,14 +72,17 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 	};
 
 	return (
-		<Box mt={4}>
+		<Box mt={1}>
 			{showCountdown ? (
 				<Countdown onComplete={onCountdownComplete} />
 			) : (
 				<>
-					<Typography variant="h6" align="center" mb={1}>
-						{`【セット ${currentSetTitle} 】第 ${currentImageIndex + 1} 問目 パス回数：${passCount}`}
+					<Typography variant="h6" align="center" mb={2}>
+						{`【セット ${currentSetTitle} 】第 ${currentImageIndex + 1} 問目`}
+						<br />
+						{`パス回数：${passCount}`}
 					</Typography>
+
 					<Box
 						display="flex"
 						justifyContent="center"
@@ -119,7 +122,7 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 							}}
 						/>
 					</Card>
-					<Box mt={2}>
+					<Box mt={1}>
 						<Box display="flex" justifyContent="center" alignItems="center">
 							<InputAnswer onSubmit={handleAnswerSubmit} />
 						</Box>

@@ -36,7 +36,7 @@ const App: React.FC = () => {
 			}}
 		>
 			<Container maxWidth="sm" sx={{ width: "100%", maxWidth: "400px" }}>
-				<Stack spacing={2} p={4} bgcolor="white" borderRadius={2} boxShadow={3}>
+				<Stack spacing={1} p={4} bgcolor="white" borderRadius={2} boxShadow={1}>
 					<Typography
 						variant="h4"
 						align="center"

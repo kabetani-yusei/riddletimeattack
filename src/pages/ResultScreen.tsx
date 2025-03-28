@@ -61,7 +61,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 				onClick={handleTweet}
 				sx={{ mt: 2 }}
 			>
-				Xでシェア（結果のみSNS投稿OKです）
+				Xで投稿(結果のみSNS投稿OKです)
 			</Button>
 		</Box>
 	);
