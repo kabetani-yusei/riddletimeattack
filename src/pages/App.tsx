@@ -16,12 +16,14 @@ import {
 import PuzzleScreen from "./PuzzleScreen";
 import ResultScreen from "./ResultScreen";
 import { blue } from "@mui/material/colors";
+import { riddleSets } from "../utils/riddleSets";
 
 type Page = "home" | "puzzle" | "result";
+type RiddleSetKey = keyof typeof riddleSets;
 
 const App: React.FC = () => {
 	const [page, setPage] = useState<Page>("home");
-	const [selectedSet, setSelectedSet] = useState<"setA" | "setB">("setA");
+	const [selectedSet, setSelectedSet] = useState<RiddleSetKey>("setA");
 	const [elapsedTime, setElapsedTime] = useState(0);
 	const [passCount, setPassCount] = useState(0);
 
@@ -57,19 +59,17 @@ const App: React.FC = () => {
 									row
 									value={selectedSet}
 									onChange={(e) =>
-										setSelectedSet(e.target.value as "setA" | "setB")
+										setSelectedSet(e.target.value as RiddleSetKey)
 									}
 								>
-									<FormControlLabel
-										value="setA"
-										control={<Radio />}
-										label="セットA"
-									/>
-									<FormControlLabel
-										value="setB"
-										control={<Radio />}
-										label="セットB"
-									/>
+									{Object.entries(riddleSets).map(([key, setContent]) => (
+										<FormControlLabel
+											key={key}
+											value={key}
+											control={<Radio />}
+											label={setContent.title}
+										/>
+									))}
 								</RadioGroup>
 							</FormControl>
 							<Typography variant="body1" sx={{ fontSize: "0.9rem" }}>
@@ -94,7 +94,7 @@ const App: React.FC = () => {
 					)}
 					{page === "puzzle" && (
 						<PuzzleScreen
-							selectedSet={selectedSet}
+							content={riddleSets[selectedSet]}
 							setElapsedTime={setElapsedTime}
 							passCount={passCount}
 							setPassCount={setPassCount}
@@ -103,7 +103,7 @@ const App: React.FC = () => {
 					)}
 					{page === "result" && (
 						<ResultScreen
-							imageSetName={selectedSet === "setA" ? "セットA" : "セットB"}
+							selectedSetTitle={riddleSets[selectedSet].title}
 							elapsedTime={elapsedTime}
 							passCount={passCount}
 						/>

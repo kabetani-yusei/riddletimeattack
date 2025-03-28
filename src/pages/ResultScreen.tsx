@@ -3,13 +3,13 @@ import type React from "react";
 import { Box, Button, Typography } from "@mui/material";
 
 interface ResultScreenProps {
-	imageSetName: string;
+	selectedSetTitle: string;
 	elapsedTime: number;
 	passCount: number;
 }
 
 const ResultScreen: React.FC<ResultScreenProps> = ({
-	imageSetName,
+	selectedSetTitle,
 	elapsedTime,
 	passCount,
 }) => {
@@ -24,7 +24,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 	const handleTweet = () => {
 		const tweetText = [
 			"#例外謎 に参加したあなたは「Riddle Time Attack」を先行体験した！",
-			`セット：${imageSetName}`,
+			`セット：${selectedSetTitle}`,
 			`クリアタイム：${formatTime(elapsedTime)}`,
 			`パス回数：${passCount}回`,
 			"でした！！",
@@ -43,7 +43,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 		<Box textAlign="center" mt={0}>
 			<Box textAlign="center" mt={1}>
 				<Typography variant="body1" sx={{ fontSize: "1.2rem" }}>
-					{`結果 (${imageSetName})`}
+					{`結果 (${selectedSetTitle})`}
 				</Typography>
 				<Box mt={2} textAlign="left" sx={{ mx: "auto", maxWidth: 250 }}>
 					<Typography variant="body1" sx={{ fontSize: "1.0rem" }}>
