@@ -62,9 +62,6 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 		const nextIndex = currentImageIndex + 1;
 		if (nextIndex < content.images.length) {
 			setCurrentImageIndex(nextIndex);
-		} else {
-			setIsRunning(false);
-			setPage("result");
 		}
 	};
 

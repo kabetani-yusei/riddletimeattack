@@ -12,6 +12,7 @@ import {
 	FormLabel,
 	Radio,
 	FormControlLabel,
+	TextField,
 } from "@mui/material";
 import PuzzleScreen from "./PuzzleScreen";
 import ResultScreen from "./ResultScreen";
@@ -24,6 +25,7 @@ type RiddleSetKey = keyof typeof riddleSets;
 const App: React.FC = () => {
 	const [page, setPage] = useState<Page>("home");
 	const [selectedSet, setSelectedSet] = useState<RiddleSetKey>("setA");
+	const [userName, setUserName] = useState("");
 	const [elapsedTime, setElapsedTime] = useState(0);
 	const [passCount, setPassCount] = useState(0);
 
@@ -72,6 +74,16 @@ const App: React.FC = () => {
 									))}
 								</RadioGroup>
 							</FormControl>
+							<TextField
+								required
+								error={!userName}
+								label="ランキング掲載用のユーザー名"
+								value={userName}
+								onChange={(e) => setUserName(e.target.value)}
+								fullWidth
+								size="small"
+								sx={{ mt: 2 }}
+							/>
 							<Typography variant="body1" sx={{ fontSize: "0.9rem" }}>
 								・全10問の謎を解ききるまでのタイムを競います
 							</Typography>
@@ -87,6 +99,7 @@ const App: React.FC = () => {
 								variant="contained"
 								onClick={() => setPage("puzzle")}
 								sx={{ mt: 2 }}
+								disabled={!userName}
 							>
 								スタート
 							</Button>
@@ -105,6 +118,7 @@ const App: React.FC = () => {
 						<ResultScreen
 							selectedSetTitle={riddleSets[selectedSet].title}
 							elapsedTime={elapsedTime}
+							userName={userName}
 							passCount={passCount}
 						/>
 					)}
