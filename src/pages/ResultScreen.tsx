@@ -17,38 +17,50 @@ interface ResultScreenProps {
 	elapsedTime: number;
 	userName: string;
 	passCount: number;
+	submitResult: boolean;
+	setSubmitResult: (value: boolean) => void;
 }
 
 const ResultScreen: React.FC<ResultScreenProps> = ({
-  selectedSetTitle,
-  elapsedTime,
-  userName,
-  passCount,
+	selectedSetTitle,
+	elapsedTime,
+	userName,
+	passCount,
+	submitResult,
+	setSubmitResult,
 }) => {
-  const sentRef = useRef(false);
+	const sentRef = useRef(false);
 
-  useEffect(() => {
-    const postDataToGAS = async () => {
-      const postData = {
-        selectedSetTitle,
-        userName,
-        clearTime: formatTime(elapsedTime),
-        passCount,
-      };
-      await sendToGAS(postData);
-    };
+	useEffect(() => {
+		const postDataToGAS = async () => {
+			const postData = {
+				selectedSetTitle,
+				userName,
+				clearTime: formatTime(elapsedTime),
+				passCount,
+			};
+			await sendToGAS(postData);
+		};
 
-    if (!sentRef.current) {
-      postDataToGAS();
-      sentRef.current = true;
-    }
-  }, [selectedSetTitle, userName, elapsedTime, passCount]);
+		if (!sentRef.current && !submitResult) {
+			postDataToGAS();
+			sentRef.current = true;
+			setSubmitResult(true);
+		}
+	}, [
+		selectedSetTitle,
+		userName,
+		elapsedTime,
+		passCount,
+		submitResult,
+		setSubmitResult,
+	]);
 
 	const handleTweet = () => {
 		const tweetText = [
 			"#例外謎 に参加したあなたは「Riddle Time Attack」を先行体験した！",
 			`セット：${selectedSetTitle}`,
-			`クリアタイム：${formatTime(elapsedTime)}`,
+			`タイム：${formatTime(elapsedTime)}`,
 			`パス回数：${passCount}回`,
 			"でした！！",
 			"",
@@ -70,7 +82,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 				</Typography>
 				<Box mt={2} textAlign="left" sx={{ mx: "auto", maxWidth: 300 }}>
 					<Typography variant="body1" sx={{ fontSize: "1.0rem" }}>
-						{`・クリアタイム：${formatTime(elapsedTime)}`}
+						{`・タイム：${formatTime(elapsedTime)}`}
 					</Typography>
 					<Typography variant="body1" sx={{ fontSize: "1.0rem" }}>
 						{`・パス回数：${passCount}回`}
