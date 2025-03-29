@@ -13,21 +13,56 @@ import {
 	Radio,
 	FormControlLabel,
 	TextField,
+	Tabs,
+	Tab,
 } from "@mui/material";
 import PuzzleScreen from "./PuzzleScreen";
 import ResultScreen from "./ResultScreen";
 import { blue } from "@mui/material/colors";
 import { riddleSets } from "../utils/riddleSets";
+import Ranking from "../components/Ranking";
 
 type Page = "home" | "puzzle" | "result";
 type RiddleSetKey = keyof typeof riddleSets;
 
+interface TabPanelProps {
+	children?: React.ReactNode;
+	index: number;
+	value: number;
+}
+
+function CustomTabPanel(props: TabPanelProps) {
+	const { children, value, index, ...other } = props;
+
+	return (
+		<div
+			role="tabpanel"
+			hidden={value !== index}
+			id={`simple-tabpanel-${index}`}
+			aria-labelledby={`simple-tab-${index}`}
+			{...other}
+		>
+			{value === index && <Box sx={{ p: 1 }}>{children}</Box>}
+		</div>
+	);
+}
+
+function a11yProps(index: number) {
+	return {
+		id: `simple-tab-${index}`,
+		"aria-controls": `simple-tabpanel-${index}`,
+	};
+}
+
 const App: React.FC = () => {
 	const [page, setPage] = useState<Page>("home");
 	const [selectedSet, setSelectedSet] = useState<RiddleSetKey>("setA");
-	const [userName, setUserName] = useState("");
+	const [userName, setUserName] = useState("sample");
 	const [elapsedTime, setElapsedTime] = useState(0);
 	const [passCount, setPassCount] = useState(0);
+
+	const [submitResult, setSubmitResult] = useState(false);
+	const [outputSources, setOutputSources] = useState(0);
 
 	return (
 		<Box
@@ -115,12 +150,31 @@ const App: React.FC = () => {
 						/>
 					)}
 					{page === "result" && (
-						<ResultScreen
-							selectedSetTitle={riddleSets[selectedSet].title}
-							elapsedTime={elapsedTime}
-							userName={userName}
-							passCount={passCount}
-						/>
+						<>
+							<Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+								<Tabs
+									value={outputSources}
+									onChange={(_event, new_value) => setOutputSources(new_value)}
+									centered
+								>
+									<Tab label="結果" {...a11yProps(0)} />
+									<Tab label="ランキング" {...a11yProps(1)} />
+								</Tabs>
+							</Box>
+							<CustomTabPanel value={outputSources} index={0}>
+								<ResultScreen
+									selectedSetTitle={riddleSets[selectedSet].title}
+									elapsedTime={elapsedTime}
+									userName={userName}
+									passCount={passCount}
+									submitResult={submitResult}
+									setSubmitResult={setSubmitResult}
+								/>
+							</CustomTabPanel>
+							<CustomTabPanel value={outputSources} index={1}>
+								<Ranking selectedSetTitle={riddleSets[selectedSet].title} />
+							</CustomTabPanel>
+						</>
 					)}
 				</Stack>
 			</Container>
