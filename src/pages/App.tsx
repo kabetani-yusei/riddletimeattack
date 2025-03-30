@@ -21,6 +21,7 @@ import ResultScreen from "./ResultScreen";
 import { blue } from "@mui/material/colors";
 import { riddleSets } from "../utils/riddleSets";
 import Ranking from "../components/Ranking";
+import type { RankingItem } from "../hooks/useRanking";
 
 type Page = "home" | "puzzle" | "result";
 type RiddleSetKey = keyof typeof riddleSets;
@@ -63,6 +64,8 @@ const App: React.FC = () => {
 
 	const [submitResult, setSubmitResult] = useState(false);
 	const [outputSources, setOutputSources] = useState(0);
+
+	const [rankingItem, setRankingItem] = useState<RankingItem[]>([]);
 
 	return (
 		<Box
@@ -172,7 +175,11 @@ const App: React.FC = () => {
 								/>
 							</CustomTabPanel>
 							<CustomTabPanel value={outputSources} index={1}>
-								<Ranking selectedSetTitle={riddleSets[selectedSet].title} />
+								<Ranking 
+								selectedSetTitle={riddleSets[selectedSet].title} 
+								rankingItem={rankingItem}
+								setRankingItem={setRankingItem}
+								/>
 							</CustomTabPanel>
 						</>
 					)}

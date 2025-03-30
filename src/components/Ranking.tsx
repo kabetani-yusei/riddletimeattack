@@ -10,13 +10,21 @@ const formatTimeHour = (timeStr: string) => {
 
 interface RankingProps {
 	selectedSetTitle: string;
+	rankingItem: RankingItem[];
+	setRankingItem: React.Dispatch<React.SetStateAction<RankingItem[]>>;
 }
 
-const Ranking: React.FC<RankingProps> = ({ selectedSetTitle }) => {
-	const { rankingData, loading, error } = useRanking(selectedSetTitle);
+const Ranking: React.FC<RankingProps> = ({ selectedSetTitle,
+	rankingItem,
+	setRankingItem,
+}) => {
+	if(rankingItem.length === 0){
+		const { rankingData, loading, error } = useRanking(selectedSetTitle);
 
-	if (loading) return <div>読み込み中...</div>;
-	if (error) return <div>エラー: {error.message}</div>;
+		if (loading) return <div>読み込み中...</div>;
+		if (error) return <div>エラー: {error.message}</div>;
+		setRankingItem(rankingData);
+	}
 
 	return (
 		<div>
@@ -34,7 +42,7 @@ const Ranking: React.FC<RankingProps> = ({ selectedSetTitle }) => {
 					</tr>
 				</thead>
 				<tbody>
-					{rankingData.map((item: RankingItem, index: number) => (
+					{rankingItem.map((item: RankingItem, index: number) => (
 						<tr key={item.id ?? index}>
 							<td
 								style={{
