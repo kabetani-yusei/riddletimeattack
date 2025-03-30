@@ -12,6 +12,12 @@ const formatTime = (ms: number) => {
 	return `${String(hours).padStart(2, "0")}時間${String(minutes).padStart(2, "0")}分${String(seconds).padStart(2, "0")}秒${String(milliseconds).padStart(2, "0")}`;
 };
 
+const formatTimeHour = (timeStr: string) => {
+	// 先頭が「00時間」なら削除
+	const cleanedTime = timeStr.startsWith("00時間") ? timeStr.slice(4) : timeStr;
+	return cleanedTime;
+};
+
 interface ResultScreenProps {
 	selectedSetTitle: string;
 	elapsedTime: number;
@@ -60,7 +66,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 		const tweetText = [
 			"#例外謎 に参加したあなたは「Riddle Time Attack」を先行体験した！",
 			`セット：${selectedSetTitle}`,
-			`タイム：${formatTime(elapsedTime)}`,
+			`タイム：${formatTimeHour(formatTime(elapsedTime))}`,
 			`パス回数：${passCount}回`,
 			"でした！！",
 			"",
@@ -82,7 +88,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 				</Typography>
 				<Box mt={2} textAlign="left" sx={{ mx: "auto", maxWidth: 300 }}>
 					<Typography variant="body1" sx={{ fontSize: "1.0rem" }}>
-						{`・タイム：${formatTime(elapsedTime)}`}
+						{`・タイム：${formatTimeHour(formatTime(elapsedTime))}`}
 					</Typography>
 					<Typography variant="body1" sx={{ fontSize: "1.0rem" }}>
 						{`・パス回数：${passCount}回`}

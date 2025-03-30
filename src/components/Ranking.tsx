@@ -2,6 +2,12 @@ import type React from "react";
 import useRanking from "../hooks/useRanking";
 import type { RankingItem } from "../hooks/useRanking";
 
+const formatTimeHour = (timeStr: string) => {
+	// 先頭が「00時間」なら削除
+	const cleanedTime = timeStr.startsWith("00時間") ? timeStr.slice(4) : timeStr;
+	return cleanedTime;
+};
+
 interface RankingProps {
 	selectedSetTitle: string;
 }
@@ -23,10 +29,7 @@ const Ranking: React.FC<RankingProps> = ({ selectedSetTitle }) => {
 							ユーザー名
 						</th>
 						<th style={{ border: "1px solid #ccc", padding: "8px" }}>
-							経過時間 (秒)
-						</th>
-						<th style={{ border: "1px solid #ccc", padding: "8px" }}>
-							パス回数
+							タイム
 						</th>
 					</tr>
 				</thead>
@@ -42,26 +45,17 @@ const Ranking: React.FC<RankingProps> = ({ selectedSetTitle }) => {
 							>
 								{index + 1}
 							</td>
-							<td style={{ border: "1px solid #ccc", padding: "8px" }}>
+							<td style={{ border: "1px solid #ccc", padding: "8px", textAlign: "center" }}>
 								{item.userName}
 							</td>
 							<td
 								style={{
 									border: "1px solid #ccc",
 									padding: "8px",
-									textAlign: "right",
+									textAlign: "center",
 								}}
 							>
-								{item.elapsedTime}
-							</td>
-							<td
-								style={{
-									border: "1px solid #ccc",
-									padding: "8px",
-									textAlign: "right",
-								}}
-							>
-								{item.passCount}
+								{formatTimeHour(item.elapsedTime)}
 							</td>
 						</tr>
 					))}
