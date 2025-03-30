@@ -175,10 +175,10 @@ const App: React.FC = () => {
 								/>
 							</CustomTabPanel>
 							<CustomTabPanel value={outputSources} index={1}>
-								<Ranking 
-								selectedSetTitle={riddleSets[selectedSet].title} 
-								rankingItem={rankingItem}
-								setRankingItem={setRankingItem}
+								<Ranking
+									selectedSetTitle={riddleSets[selectedSet].title}
+									rankingItem={rankingItem}
+									setRankingItem={setRankingItem}
 								/>
 							</CustomTabPanel>
 						</>

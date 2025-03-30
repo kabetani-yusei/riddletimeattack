@@ -14,7 +14,7 @@ export const sendToGAS = async ({
 	const now = new Date();
 	const sentAt = now.toLocaleString("ja-JP", {
 		timeZone: "Asia/Tokyo",
-		hour12: false
+		hour12: false,
 	});
 
 	const payload = {
