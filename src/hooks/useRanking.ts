@@ -5,7 +5,6 @@ export interface RankingItem {
 	selectedSetTitle: string;
 	userName: string;
 	elapsedTime: string;
-	passCount: number;
 }
 
 interface UseRankingReturn {

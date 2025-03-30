@@ -44,7 +44,7 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 
 	const handlePass = () => {
 		setPassCount((prev) => prev + 1);
-		setAdditionalTime((prev) => prev + 300000); // 5分追加
+		setAdditionalTime((prev) => prev + 180000); // 3分追加
 		showNextImage();
 	};
 
@@ -117,7 +117,7 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 						</Box>
 						<Box mt={5} display="flex" justifyContent="center">
 							<Button variant="contained" onClick={handlePass}>
-								パス (5分追加)
+								パス (3分追加)
 							</Button>
 						</Box>
 					</Box>

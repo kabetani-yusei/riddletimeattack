@@ -11,7 +11,14 @@ export const sendToGAS = async ({
 }) => {
 	const endpoint = import.meta.env.VITE_GAS_ENDPOINT;
 
+	const now = new Date();
+	const sentAt = now.toLocaleString("ja-JP", {
+		timeZone: "Asia/Tokyo",
+		hour12: false,
+	});
+
 	const payload = {
+		sentAt,
 		selectedSetTitle,
 		userName,
 		clearTime,
