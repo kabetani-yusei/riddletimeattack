@@ -43,25 +43,20 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 	};
 
 	const handlePass = () => {
-		const isLast = currentImageIndex + 1 >= content.images.length;
 		setPassCount((prev) => prev + 1);
 		setAdditionalTime((prev) => prev + 300000); // 5分追加
-
-		if (isLast) {
-			// 追加時間が適用されるのを待つために短い遅延を入れる
-			setTimeout(() => {
-				setIsRunning(false); // Stopwatch 停止
-				setShouldGoToResult(true); // Stopwatch 側に画面遷移を託す
-			}, 50);
-		} else {
-			showNextImage();
-		}
+		showNextImage();
 	};
 
 	const showNextImage = () => {
 		const nextIndex = currentImageIndex + 1;
 		if (nextIndex < content.images.length) {
 			setCurrentImageIndex(nextIndex);
+		} else {
+			setTimeout(() => {
+				setIsRunning(false); // Stopwatch 停止
+				setShouldGoToResult(true); // Stopwatch 側に画面遷移を託す
+			}, 50);
 		}
 	};
 

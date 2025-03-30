@@ -57,7 +57,7 @@ function a11yProps(index: number) {
 const App: React.FC = () => {
 	const [page, setPage] = useState<Page>("home");
 	const [selectedSet, setSelectedSet] = useState<RiddleSetKey>("setA");
-	const [userName, setUserName] = useState("sample");
+	const [userName, setUserName] = useState("");
 	const [elapsedTime, setElapsedTime] = useState(0);
 	const [passCount, setPassCount] = useState(0);
 
