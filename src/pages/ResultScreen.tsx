@@ -64,11 +64,10 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 
 	const handleTweet = () => {
 		const tweetText = [
-			"#例外謎 に参加したあなたは「Riddle Time Attack」を先行体験した！",
+			"#「Riddle Time Attack」を遊びました！",
 			`セット：${selectedSetTitle}`,
 			`タイム：${formatTimeHour(formatTime(elapsedTime))}`,
 			`パス回数：${passCount}回`,
-			"でした！！",
 			"",
 			"みんなで結果を共有して競い合おう！",
 			"#RiddleTA",
