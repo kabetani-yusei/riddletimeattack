@@ -1,6 +1,6 @@
 // src/App.tsx
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
 	Button,
 	Container,
@@ -65,7 +65,17 @@ const App: React.FC = () => {
 	const [submitResult, setSubmitResult] = useState(false);
 	const [outputSources, setOutputSources] = useState(0);
 
+	const [rankingDataFlag, setRankingDataFlag] = useState(false);
+
 	const [rankingItem, setRankingItem] = useState<RankingItem[]>([]);
+	const [homeTab, setHomeTab] = useState<number>(0);
+	const [rankingSet, setRankingSet] = useState<RiddleSetKey>("setA");
+	const [rankingSetTitle, setRankingSetTitle] = useState<string>("セットA");
+
+	useEffect(() => {
+		setRankingSetTitle(riddleSets[rankingSet].title);
+		setRankingItem([]);
+	}, [rankingSet]);
 
 	return (
 		<Box
@@ -93,54 +103,96 @@ const App: React.FC = () => {
 					</Typography>
 					{page === "home" && (
 						<>
-							<FormControl component="fieldset">
-								<FormLabel component="legend">謎セットを選択</FormLabel>
-								<RadioGroup
-									row
-									value={selectedSet}
-									onChange={(e) =>
-										setSelectedSet(e.target.value as RiddleSetKey)
-									}
-								>
-									{Object.entries(riddleSets).map(([key, setContent]) => (
-										<FormControlLabel
-											key={key}
-											value={key}
-											control={<Radio />}
-											label={setContent.title}
-										/>
-									))}
-								</RadioGroup>
-							</FormControl>
-							<TextField
-								required
-								error={!userName}
-								label="ランキング掲載用のユーザー名"
-								value={userName}
-								onChange={(e) => setUserName(e.target.value)}
-								fullWidth
-								size="small"
-								sx={{ mt: 2 }}
-							/>
-							<Typography variant="body1" sx={{ fontSize: "0.9rem" }}>
-								・全10問の謎を解ききるまでのタイムを競います
-							</Typography>
-							<Typography variant="body1" sx={{ fontSize: "0.9rem" }}>
-								・答えは全てひらがなで入力してください
-							</Typography>
-							<Typography variant="body1" sx={{ fontSize: "0.9rem" }}>
-								・謎がわからない場合はその謎をパスできますが
-								<br />
-								&nbsp;&nbsp;タイムに5分のペナルティがつきます
-							</Typography>
-							<Button
-								variant="contained"
-								onClick={() => setPage("puzzle")}
-								sx={{ mt: 2 }}
-								disabled={!userName}
+							<Tabs
+								value={homeTab}
+								onChange={(_event, newValue) => setHomeTab(newValue)}
+								centered
 							>
-								スタート
-							</Button>
+								<Tab label="ホーム" {...a11yProps(0)} />
+								<Tab label="ランキング" {...a11yProps(1)} />
+							</Tabs>
+							<CustomTabPanel value={homeTab} index={0}>
+								<Stack direction="column" spacing={2} mb={2}>
+									<FormControl component="fieldset">
+										<FormLabel component="legend">謎セットを選択</FormLabel>
+										<RadioGroup
+											row
+											value={selectedSet}
+											onChange={(e) =>
+												setSelectedSet(e.target.value as RiddleSetKey)
+											}
+										>
+											{Object.entries(riddleSets).map(([key, setContent]) => (
+												<FormControlLabel
+													key={key}
+													value={key}
+													control={<Radio />}
+													label={setContent.title}
+												/>
+											))}
+										</RadioGroup>
+									</FormControl>
+									<TextField
+										required
+										error={!userName}
+										label="ランキング掲載用のユーザー名"
+										value={userName}
+										onChange={(e) => setUserName(e.target.value)}
+										fullWidth
+										size="small"
+										sx={{ mt: 0 }}
+									/>
+									<Typography variant="body1" sx={{ fontSize: "0.9rem" }}>
+										・全10問の謎を解ききるまでのタイムを競います
+									</Typography>
+									<Typography variant="body1" sx={{ fontSize: "0.9rem" }}>
+										・答えは全てひらがなで入力してください
+									</Typography>
+									<Typography variant="body1" sx={{ fontSize: "0.9rem" }}>
+										・謎がわからない場合はその謎をパスできますが
+										<br />
+										&nbsp;&nbsp;タイムに5分のペナルティがつきます
+									</Typography>
+									<Button
+										variant="contained"
+										onClick={() => setPage("puzzle")}
+										sx={{ mt: 0 }}
+										disabled={!userName}
+									>
+										スタート
+									</Button>
+								</Stack>
+							</CustomTabPanel>
+							<CustomTabPanel value={homeTab} index={1}>
+								{/* ランキング上部に問題セット選択用のラジオボタン */}
+								<Box mb={2}>
+									<FormControl component="fieldset">
+										<FormLabel component="legend">問題セットを選択</FormLabel>
+										<RadioGroup
+											row
+											value={rankingSet}
+											onChange={(e) =>
+												setRankingSet(e.target.value as RiddleSetKey)
+											}
+										>
+											{Object.entries(riddleSets).map(([key, setContent]) => (
+												<FormControlLabel
+													key={key}
+													value={key}
+													control={<Radio />}
+													label={setContent.title}
+												/>
+											))}
+										</RadioGroup>
+									</FormControl>
+								</Box>
+								<Ranking
+									selectedSetTitle={rankingSetTitle}
+									rankingItem={rankingItem}
+									setRankingItem={setRankingItem}
+									rankingDataFlag={true}
+								/>
+							</CustomTabPanel>
 						</>
 					)}
 					{page === "puzzle" && (
@@ -179,6 +231,8 @@ const App: React.FC = () => {
 									selectedSetTitle={riddleSets[selectedSet].title}
 									rankingItem={rankingItem}
 									setRankingItem={setRankingItem}
+									rankingDataFlag={rankingDataFlag}
+									setRankingDataFlag={setRankingDataFlag}
 								/>
 							</CustomTabPanel>
 						</>

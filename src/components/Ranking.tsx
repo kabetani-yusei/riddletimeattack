@@ -24,19 +24,26 @@ interface RankingProps {
 	selectedSetTitle: string;
 	rankingItem: RankingItem[];
 	setRankingItem: React.Dispatch<React.SetStateAction<RankingItem[]>>;
+	rankingDataFlag: boolean;
+	setRankingDataFlag?: React.Dispatch<React.SetStateAction<boolean>> | null;
 }
 
 const Ranking: React.FC<RankingProps> = ({
 	selectedSetTitle,
 	rankingItem,
 	setRankingItem,
+	rankingDataFlag,
+	setRankingDataFlag,
 }) => {
-	if (rankingItem.length === 0) {
+	if (rankingItem.length === 0 || !rankingDataFlag) {
 		const { rankingData, loading, error } = useRanking(selectedSetTitle);
 
 		if (loading) return <div>読み込み中...</div>;
 		if (error) return <div>エラー: {error.message}</div>;
 		setRankingItem(rankingData);
+		if (setRankingDataFlag){
+			setRankingDataFlag(true);
+		}
 	}
 
 	return (
