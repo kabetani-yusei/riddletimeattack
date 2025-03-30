@@ -20,7 +20,7 @@ const Ranking: React.FC<RankingProps> = ({ selectedSetTitle }) => {
 
 	return (
 		<div>
-			<h2>{selectedSetTitle} のランキング</h2>
+			<h2>{selectedSetTitle} のランキング（Top10）</h2>
 			<table style={{ borderCollapse: "collapse", width: "100%" }}>
 				<thead>
 					<tr>
