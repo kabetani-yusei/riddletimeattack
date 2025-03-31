@@ -14,8 +14,7 @@ const formatTime = (ms: number) => {
 
 const formatTimeHour = (timeStr: string) => {
 	// 先頭が「00時間」なら削除
-	const cleanedTime = timeStr.startsWith("00時間") ? timeStr.slice(4) : timeStr;
-	return cleanedTime;
+	return timeStr.startsWith("00時間") ? timeStr.slice(4) : timeStr;
 };
 
 interface ResultScreenProps {
@@ -25,6 +24,7 @@ interface ResultScreenProps {
 	passCount: number;
 	submitResult: boolean;
 	setSubmitResult: (value: boolean) => void;
+	refetch: () => void;
 }
 
 const ResultScreen: React.FC<ResultScreenProps> = ({
@@ -34,41 +34,43 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 	passCount,
 	submitResult,
 	setSubmitResult,
+	refetch,
 }) => {
 	const sentRef = useRef(false);
 
 	useEffect(() => {
-		const postDataToGAS = async () => {
-			const postData = {
-				selectedSetTitle,
-				userName,
-				clearTime: formatTime(elapsedTime),
-				passCount,
-			};
-			await sendToGAS(postData);
-		};
-
 		if (!sentRef.current && !submitResult) {
+			const postDataToGAS = async () => {
+				const postData = {
+					selectedSetTitle,
+					userName,
+					clearTime: formatTime(elapsedTime),
+					passCount,
+				};
+				await sendToGAS(postData);
+				// 結果送信後、最新のランキングを再取得
+				refetch();
+			};
 			postDataToGAS();
 			sentRef.current = true;
 			setSubmitResult(true);
 		}
 	}, [
 		selectedSetTitle,
-		userName,
 		elapsedTime,
+		userName,
 		passCount,
+		refetch,
 		submitResult,
 		setSubmitResult,
 	]);
 
 	const handleTweet = () => {
 		const tweetText = [
-			"#例外謎 に参加したあなたは「Riddle Time Attack」を先行体験した！",
+			"#「Riddle Time Attack」を遊びました！",
 			`セット：${selectedSetTitle}`,
 			`タイム：${formatTimeHour(formatTime(elapsedTime))}`,
 			`パス回数：${passCount}回`,
-			"でした！！",
 			"",
 			"みんなで結果を共有して競い合おう！",
 			"#RiddleTA",

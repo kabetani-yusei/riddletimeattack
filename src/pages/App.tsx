@@ -1,6 +1,7 @@
 // src/App.tsx
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import useFetchRanking from "../hooks/useFetchRanking";
 import {
 	Button,
 	Container,
@@ -21,7 +22,6 @@ import ResultScreen from "./ResultScreen";
 import { blue } from "@mui/material/colors";
 import { riddleSets } from "../utils/riddleSets";
 import Ranking from "../components/Ranking";
-import type { RankingItem } from "../hooks/useRanking";
 
 type Page = "home" | "puzzle" | "result";
 type RiddleSetKey = keyof typeof riddleSets;
@@ -61,21 +61,15 @@ const App: React.FC = () => {
 	const [userName, setUserName] = useState("");
 	const [elapsedTime, setElapsedTime] = useState(0);
 	const [passCount, setPassCount] = useState(0);
-
 	const [submitResult, setSubmitResult] = useState(false);
 	const [outputSources, setOutputSources] = useState(0);
 
-	const [rankingDataFlag, setRankingDataFlag] = useState(false);
-
-	const [rankingItem, setRankingItem] = useState<RankingItem[]>([]);
+	// ホーム画面用の状態
 	const [homeTab, setHomeTab] = useState<number>(0);
 	const [rankingSet, setRankingSet] = useState<RiddleSetKey>("setA");
-	const [rankingSetTitle, setRankingSetTitle] = useState<string>("セットA");
 
-	useEffect(() => {
-		setRankingSetTitle(riddleSets[rankingSet].title);
-		setRankingItem([]);
-	}, [rankingSet]);
+	// useFetchRanking フックからランキングデータ、loading、refetch を取得
+	const { rankingData, loading, refetch } = useFetchRanking();
 
 	return (
 		<Box
@@ -95,8 +89,7 @@ const App: React.FC = () => {
 						gutterBottom
 						sx={{
 							fontWeight: "bold",
-							color: blue[700], // 例: deepPurpleの500番を利用
-							// もしくはテーマのprimary色の場合は、color: 'primary.main'
+							color: blue[700],
 						}}
 					>
 						Riddle Time Attack
@@ -151,7 +144,7 @@ const App: React.FC = () => {
 									<Typography variant="body1" sx={{ fontSize: "0.9rem" }}>
 										・謎がわからない場合はその謎をパスできますが
 										<br />
-										&nbsp;&nbsp;タイムに5分のペナルティがつきます
+										&nbsp;&nbsp;タイムに3分のペナルティがつきます
 									</Typography>
 									<Button
 										variant="contained"
@@ -187,10 +180,10 @@ const App: React.FC = () => {
 									</FormControl>
 								</Box>
 								<Ranking
-									selectedSetTitle={rankingSetTitle}
-									rankingItem={rankingItem}
-									setRankingItem={setRankingItem}
-									rankingDataFlag={true}
+									selectedSetTitle={riddleSets[rankingSet].title}
+									rankingItem={rankingData}
+									loading={loading}
+									refetch={refetch}
 								/>
 							</CustomTabPanel>
 						</>
@@ -209,7 +202,7 @@ const App: React.FC = () => {
 							<Box sx={{ borderBottom: 1, borderColor: "divider" }}>
 								<Tabs
 									value={outputSources}
-									onChange={(_event, new_value) => setOutputSources(new_value)}
+									onChange={(_event, newValue) => setOutputSources(newValue)}
 									centered
 								>
 									<Tab label="結果" {...a11yProps(0)} />
@@ -217,22 +210,24 @@ const App: React.FC = () => {
 								</Tabs>
 							</Box>
 							<CustomTabPanel value={outputSources} index={0}>
-								<ResultScreen
-									selectedSetTitle={riddleSets[selectedSet].title}
-									elapsedTime={elapsedTime}
-									userName={userName}
-									passCount={passCount}
-									submitResult={submitResult}
-									setSubmitResult={setSubmitResult}
-								/>
+								<CustomTabPanel value={outputSources} index={0}>
+									<ResultScreen
+										selectedSetTitle={riddleSets[selectedSet].title}
+										elapsedTime={elapsedTime}
+										userName={userName}
+										passCount={passCount}
+										submitResult={submitResult}
+										setSubmitResult={setSubmitResult}
+										refetch={refetch}
+									/>
+								</CustomTabPanel>
 							</CustomTabPanel>
 							<CustomTabPanel value={outputSources} index={1}>
 								<Ranking
 									selectedSetTitle={riddleSets[selectedSet].title}
-									rankingItem={rankingItem}
-									setRankingItem={setRankingItem}
-									rankingDataFlag={rankingDataFlag}
-									setRankingDataFlag={setRankingDataFlag}
+									rankingItem={rankingData}
+									loading={loading}
+									refetch={refetch}
 								/>
 							</CustomTabPanel>
 						</>

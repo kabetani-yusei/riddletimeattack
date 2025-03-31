@@ -1,6 +1,8 @@
+// src/components/Ranking.tsx
 import type React from "react";
-import useRanking from "../hooks/useRanking";
-import type { RankingItem } from "../hooks/useRanking";
+import { useMemo } from "react";
+import useFormatRanking from "../hooks/useFormatRanking";
+import type { RankingItem } from "../hooks/useFetchRanking";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import {
 	IconButton,
@@ -12,38 +14,47 @@ import {
 	TableRow,
 	Typography,
 	Box,
+	CircularProgress,
 } from "@mui/material";
 
 const formatTimeHour = (timeStr: string) => {
-	// 先頭が「00時間」なら削除（"00時間" は全角文字の場合もあるので注意）
-	const cleanedTime = timeStr.startsWith("00時間") ? timeStr.slice(4) : timeStr;
-	return cleanedTime;
+	// 先頭が「00時間」なら削除（全角文字の場合も考慮）
+	return timeStr.startsWith("00時間") ? timeStr.slice(4) : timeStr;
 };
 
 interface RankingProps {
 	selectedSetTitle: string;
 	rankingItem: RankingItem[];
-	setRankingItem: React.Dispatch<React.SetStateAction<RankingItem[]>>;
-	rankingDataFlag: boolean;
-	setRankingDataFlag?: React.Dispatch<React.SetStateAction<boolean>> | null;
+	loading: boolean;
+	refetch: () => void;
 }
 
 const Ranking: React.FC<RankingProps> = ({
 	selectedSetTitle,
 	rankingItem,
-	setRankingItem,
-	rankingDataFlag,
-	setRankingDataFlag,
+	loading,
+	refetch,
 }) => {
-	if (rankingItem.length === 0 || !rankingDataFlag) {
-		const { rankingData, loading, error } = useRanking(selectedSetTitle);
+	// rankingItem と selectedSetTitle から整形済みランキングを算出
+	const formattedRanking = useMemo(() => {
+		const { formatRankingData } = useFormatRanking(
+			selectedSetTitle,
+			rankingItem,
+		);
+		return formatRankingData;
+	}, [selectedSetTitle, rankingItem]);
 
-		if (loading) return <div>読み込み中...</div>;
-		if (error) return <div>エラー: {error.message}</div>;
-		setRankingItem(rankingData);
-		if (setRankingDataFlag){
-			setRankingDataFlag(true);
-		}
+	if (loading) {
+		return (
+			<Box
+				display="flex"
+				justifyContent="center"
+				alignItems="center"
+				minHeight={200}
+			>
+				<CircularProgress />
+			</Box>
+		);
 	}
 
 	return (
@@ -58,7 +69,7 @@ const Ranking: React.FC<RankingProps> = ({
 					{selectedSetTitle} のランキング（Top10）
 				</Typography>
 				<Tooltip title="再読み込み">
-					<IconButton onClick={() => setRankingItem([])}>
+					<IconButton onClick={refetch}>
 						<RefreshIcon />
 					</IconButton>
 				</Tooltip>
@@ -87,7 +98,7 @@ const Ranking: React.FC<RankingProps> = ({
 					</TableRow>
 				</TableHead>
 				<TableBody>
-					{rankingItem.map((item: RankingItem, index: number) => (
+					{formattedRanking.map((item: RankingItem, index: number) => (
 						<TableRow key={item.id ?? index}>
 							<TableCell
 								align="center"
