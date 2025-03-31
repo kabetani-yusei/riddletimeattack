@@ -1,6 +1,7 @@
 // src/App.tsx
 import type React from "react";
 import { useEffect, useState } from "react";
+import useFetchRanking from "../hooks/useFetchRanking";
 import {
 	Button,
 	Container,
@@ -21,7 +22,7 @@ import ResultScreen from "./ResultScreen";
 import { blue } from "@mui/material/colors";
 import { riddleSets } from "../utils/riddleSets";
 import Ranking from "../components/Ranking";
-import type { RankingItem } from "../hooks/useRanking";
+import type { RankingItem } from "../hooks/useFetchRanking";
 
 type Page = "home" | "puzzle" | "result";
 type RiddleSetKey = keyof typeof riddleSets;
@@ -61,21 +62,23 @@ const App: React.FC = () => {
 	const [userName, setUserName] = useState("");
 	const [elapsedTime, setElapsedTime] = useState(0);
 	const [passCount, setPassCount] = useState(0);
-
 	const [submitResult, setSubmitResult] = useState(false);
 	const [outputSources, setOutputSources] = useState(0);
 
-	const [rankingDataFlag, setRankingDataFlag] = useState(false);
-
-	const [rankingItem, setRankingItem] = useState<RankingItem[]>([]);
+	// ホーム画面で使う状態
 	const [homeTab, setHomeTab] = useState<number>(0);
 	const [rankingSet, setRankingSet] = useState<RiddleSetKey>("setA");
-	const [rankingSetTitle, setRankingSetTitle] = useState<string>("セットA");
 
+	// カスタムフックからランキングデータ、loading状態、再取得用関数を取得
+	const [rankingItem, setRankingItem] = useState<RankingItem[]>([]);
+	const { rankingData, loading, refetch } = useFetchRanking();
+
+	// rankingData に変化があったら rankingItem を更新（レンダー中に状態更新しないようuseEffectで）
 	useEffect(() => {
-		setRankingSetTitle(riddleSets[rankingSet].title);
-		setRankingItem([]);
-	}, [rankingSet]);
+		if (rankingData.length > 0) {
+			setRankingItem(rankingData);
+		}
+	}, [rankingData]);
 
 	return (
 		<Box
@@ -95,8 +98,7 @@ const App: React.FC = () => {
 						gutterBottom
 						sx={{
 							fontWeight: "bold",
-							color: blue[700], // 例: deepPurpleの500番を利用
-							// もしくはテーマのprimary色の場合は、color: 'primary.main'
+							color: blue[700],
 						}}
 					>
 						Riddle Time Attack
@@ -187,10 +189,10 @@ const App: React.FC = () => {
 									</FormControl>
 								</Box>
 								<Ranking
-									selectedSetTitle={rankingSetTitle}
+									selectedSetTitle={riddleSets[rankingSet].title}
 									rankingItem={rankingItem}
-									setRankingItem={setRankingItem}
-									rankingDataFlag={true}
+									loading={loading}
+									refetch={refetch}
 								/>
 							</CustomTabPanel>
 						</>
@@ -209,7 +211,7 @@ const App: React.FC = () => {
 							<Box sx={{ borderBottom: 1, borderColor: "divider" }}>
 								<Tabs
 									value={outputSources}
-									onChange={(_event, new_value) => setOutputSources(new_value)}
+									onChange={(_event, newValue) => setOutputSources(newValue)}
 									centered
 								>
 									<Tab label="結果" {...a11yProps(0)} />
@@ -224,15 +226,15 @@ const App: React.FC = () => {
 									passCount={passCount}
 									submitResult={submitResult}
 									setSubmitResult={setSubmitResult}
+									setRankingItem={setRankingItem}
 								/>
 							</CustomTabPanel>
 							<CustomTabPanel value={outputSources} index={1}>
 								<Ranking
 									selectedSetTitle={riddleSets[selectedSet].title}
 									rankingItem={rankingItem}
-									setRankingItem={setRankingItem}
-									rankingDataFlag={rankingDataFlag}
-									setRankingDataFlag={setRankingDataFlag}
+									loading={loading}
+									refetch={refetch}
 								/>
 							</CustomTabPanel>
 						</>
