@@ -3,7 +3,6 @@ import type React from "react";
 import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef } from "react";
 import { sendToGAS } from "../hooks/useSendToGAS";
-import type { RankingItem } from "../hooks/useFetchRanking";
 
 const formatTime = (ms: number) => {
 	const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
@@ -25,7 +24,7 @@ interface ResultScreenProps {
 	passCount: number;
 	submitResult: boolean;
 	setSubmitResult: (value: boolean) => void;
-	setRankingItem: React.Dispatch<React.SetStateAction<RankingItem[]>>;
+	refetch: () => void;
 }
 
 const ResultScreen: React.FC<ResultScreenProps> = ({
@@ -35,23 +34,12 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 	passCount,
 	submitResult,
 	setSubmitResult,
-	setRankingItem,
+	refetch,
 }) => {
 	const sentRef = useRef(false);
 
 	useEffect(() => {
 		if (!sentRef.current && !submitResult) {
-			// ランキングに結果を追加（前の状態に追加する形で更新）
-			setRankingItem((prev) => [
-				...prev,
-				{
-					selectedSetTitle,
-					userName,
-					elapsedTime: formatTime(elapsedTime),
-				},
-			]);
-
-			// GAS へのデータ送信
 			const postDataToGAS = async () => {
 				const postData = {
 					selectedSetTitle,
@@ -60,19 +48,20 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 					passCount,
 				};
 				await sendToGAS(postData);
+				// 結果送信後、最新のランキングを再取得
+				refetch();
 			};
 			postDataToGAS();
-
 			sentRef.current = true;
 			setSubmitResult(true);
 		}
 	}, [
-		submitResult,
-		setRankingItem,
 		selectedSetTitle,
-		userName,
 		elapsedTime,
+		userName,
 		passCount,
+		refetch,
+		submitResult,
 		setSubmitResult,
 	]);
 

@@ -14,6 +14,7 @@ import {
 	TableRow,
 	Typography,
 	Box,
+	CircularProgress,
 } from "@mui/material";
 
 const formatTimeHour = (timeStr: string) => {
@@ -36,17 +37,34 @@ const Ranking: React.FC<RankingProps> = ({
 }) => {
 	// rankingItem と selectedSetTitle から整形済みランキングを算出
 	const formattedRanking = useMemo(() => {
-		const { formatRankingData } = useFormatRanking(selectedSetTitle, rankingItem);
+		const { formatRankingData } = useFormatRanking(
+			selectedSetTitle,
+			rankingItem,
+		);
 		return formatRankingData;
 	}, [selectedSetTitle, rankingItem]);
 
 	if (loading) {
-		return <div>読み込み中...</div>;
+		return (
+			<Box
+				display="flex"
+				justifyContent="center"
+				alignItems="center"
+				minHeight={200}
+			>
+				<CircularProgress />
+			</Box>
+		);
 	}
 
 	return (
 		<Box>
-			<Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+			<Box
+				display="flex"
+				justifyContent="space-between"
+				alignItems="center"
+				mb={2}
+			>
 				<Typography variant="h6">
 					{selectedSetTitle} のランキング（Top10）
 				</Typography>
@@ -59,13 +77,22 @@ const Ranking: React.FC<RankingProps> = ({
 			<Table sx={{ borderCollapse: "collapse", width: "100%" }}>
 				<TableHead>
 					<TableRow>
-						<TableCell align="center" sx={{ border: "1px solid #ccc", padding: "8px" }}>
+						<TableCell
+							align="center"
+							sx={{ border: "1px solid #ccc", padding: "8px" }}
+						>
 							順位
 						</TableCell>
-						<TableCell align="center" sx={{ border: "1px solid #ccc", padding: "8px" }}>
+						<TableCell
+							align="center"
+							sx={{ border: "1px solid #ccc", padding: "8px" }}
+						>
 							ユーザー名
 						</TableCell>
-						<TableCell align="center" sx={{ border: "1px solid #ccc", padding: "8px" }}>
+						<TableCell
+							align="center"
+							sx={{ border: "1px solid #ccc", padding: "8px" }}
+						>
 							タイム
 						</TableCell>
 					</TableRow>
@@ -73,13 +100,22 @@ const Ranking: React.FC<RankingProps> = ({
 				<TableBody>
 					{formattedRanking.map((item: RankingItem, index: number) => (
 						<TableRow key={item.id ?? index}>
-							<TableCell align="center" sx={{ border: "1px solid #ccc", padding: "8px" }}>
+							<TableCell
+								align="center"
+								sx={{ border: "1px solid #ccc", padding: "8px" }}
+							>
 								{index + 1}
 							</TableCell>
-							<TableCell align="center" sx={{ border: "1px solid #ccc", padding: "8px" }}>
+							<TableCell
+								align="center"
+								sx={{ border: "1px solid #ccc", padding: "8px" }}
+							>
 								{item.userName}
 							</TableCell>
-							<TableCell align="center" sx={{ border: "1px solid #ccc", padding: "8px" }}>
+							<TableCell
+								align="center"
+								sx={{ border: "1px solid #ccc", padding: "8px" }}
+							>
 								{formatTimeHour(item.elapsedTime)}
 							</TableCell>
 						</TableRow>

@@ -1,6 +1,6 @@
 // src/App.tsx
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import useFetchRanking from "../hooks/useFetchRanking";
 import {
 	Button,
@@ -22,7 +22,6 @@ import ResultScreen from "./ResultScreen";
 import { blue } from "@mui/material/colors";
 import { riddleSets } from "../utils/riddleSets";
 import Ranking from "../components/Ranking";
-import type { RankingItem } from "../hooks/useFetchRanking";
 
 type Page = "home" | "puzzle" | "result";
 type RiddleSetKey = keyof typeof riddleSets;
@@ -65,20 +64,12 @@ const App: React.FC = () => {
 	const [submitResult, setSubmitResult] = useState(false);
 	const [outputSources, setOutputSources] = useState(0);
 
-	// ホーム画面で使う状態
+	// ホーム画面用の状態
 	const [homeTab, setHomeTab] = useState<number>(0);
 	const [rankingSet, setRankingSet] = useState<RiddleSetKey>("setA");
 
-	// カスタムフックからランキングデータ、loading状態、再取得用関数を取得
-	const [rankingItem, setRankingItem] = useState<RankingItem[]>([]);
+	// useFetchRanking フックからランキングデータ、loading、refetch を取得
 	const { rankingData, loading, refetch } = useFetchRanking();
-
-	// rankingData に変化があったら rankingItem を更新（レンダー中に状態更新しないようuseEffectで）
-	useEffect(() => {
-		if (rankingData.length > 0) {
-			setRankingItem(rankingData);
-		}
-	}, [rankingData]);
 
 	return (
 		<Box
@@ -153,7 +144,7 @@ const App: React.FC = () => {
 									<Typography variant="body1" sx={{ fontSize: "0.9rem" }}>
 										・謎がわからない場合はその謎をパスできますが
 										<br />
-										&nbsp;&nbsp;タイムに5分のペナルティがつきます
+										&nbsp;&nbsp;タイムに3分のペナルティがつきます
 									</Typography>
 									<Button
 										variant="contained"
@@ -190,7 +181,7 @@ const App: React.FC = () => {
 								</Box>
 								<Ranking
 									selectedSetTitle={riddleSets[rankingSet].title}
-									rankingItem={rankingItem}
+									rankingItem={rankingData}
 									loading={loading}
 									refetch={refetch}
 								/>
@@ -219,20 +210,22 @@ const App: React.FC = () => {
 								</Tabs>
 							</Box>
 							<CustomTabPanel value={outputSources} index={0}>
-								<ResultScreen
-									selectedSetTitle={riddleSets[selectedSet].title}
-									elapsedTime={elapsedTime}
-									userName={userName}
-									passCount={passCount}
-									submitResult={submitResult}
-									setSubmitResult={setSubmitResult}
-									setRankingItem={setRankingItem}
-								/>
+								<CustomTabPanel value={outputSources} index={0}>
+									<ResultScreen
+										selectedSetTitle={riddleSets[selectedSet].title}
+										elapsedTime={elapsedTime}
+										userName={userName}
+										passCount={passCount}
+										submitResult={submitResult}
+										setSubmitResult={setSubmitResult}
+										refetch={refetch}
+									/>
+								</CustomTabPanel>
 							</CustomTabPanel>
 							<CustomTabPanel value={outputSources} index={1}>
 								<Ranking
 									selectedSetTitle={riddleSets[selectedSet].title}
-									rankingItem={rankingItem}
+									rankingItem={rankingData}
 									loading={loading}
 									refetch={refetch}
 								/>
