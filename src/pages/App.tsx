@@ -60,6 +60,7 @@ const App: React.FC = () => {
 	const [selectedSet, setSelectedSet] = useState<RiddleSetKey>("setA");
 	const [userName, setUserName] = useState("");
 	const [elapsedTime, setElapsedTime] = useState(0);
+	const [hintCount, setHintCount] = useState(0);
 	const [passCount, setPassCount] = useState(0);
 	const [submitResult, setSubmitResult] = useState(false);
 	const [outputSources, setOutputSources] = useState(0);
@@ -142,9 +143,14 @@ const App: React.FC = () => {
 										・答えは全てひらがなで入力してください
 									</Typography>
 									<Typography variant="body1" sx={{ fontSize: "0.9rem" }}>
-										・謎がわからない場合はその謎をパスできますが
+										・謎がわからない場合はヒントを見ることができます
 										<br />
-										&nbsp;&nbsp;タイムに3分のペナルティがつきます
+										&nbsp;&nbsp;ただし、タイムに1分のペナルティがつきます
+									</Typography>
+									<Typography variant="body1" sx={{ fontSize: "0.9rem" }}>
+										・ヒントを見ても分からない場合はパスをしてください
+										<br />
+										&nbsp;&nbsp;ただし、タイムに3分のペナルティがつきます
 									</Typography>
 									<Button
 										variant="contained"
@@ -192,6 +198,7 @@ const App: React.FC = () => {
 						<PuzzleScreen
 							content={riddleSets[selectedSet]}
 							setElapsedTime={setElapsedTime}
+							setHintCount={setHintCount}
 							passCount={passCount}
 							setPassCount={setPassCount}
 							setPage={setPage}
@@ -215,6 +222,7 @@ const App: React.FC = () => {
 										selectedSetTitle={riddleSets[selectedSet].title}
 										elapsedTime={elapsedTime}
 										userName={userName}
+										hintCount={hintCount}
 										passCount={passCount}
 										submitResult={submitResult}
 										setSubmitResult={setSubmitResult}

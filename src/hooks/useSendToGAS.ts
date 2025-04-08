@@ -2,11 +2,13 @@ export const sendToGAS = async ({
 	selectedSetTitle,
 	userName,
 	clearTime,
+	hintCount,
 	passCount,
 }: {
 	selectedSetTitle: string;
 	userName: string;
 	clearTime: string;
+	hintCount: number;
 	passCount: number;
 }) => {
 	const endpoint = import.meta.env.VITE_GAS_ENDPOINT;
@@ -22,6 +24,7 @@ export const sendToGAS = async ({
 		selectedSetTitle,
 		userName,
 		clearTime,
+		hintCount,
 		passCount,
 	};
 

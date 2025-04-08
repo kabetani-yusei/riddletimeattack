@@ -21,6 +21,7 @@ interface ResultScreenProps {
 	selectedSetTitle: string;
 	elapsedTime: number;
 	userName: string;
+	hintCount: number;
 	passCount: number;
 	submitResult: boolean;
 	setSubmitResult: (value: boolean) => void;
@@ -31,6 +32,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 	selectedSetTitle,
 	elapsedTime,
 	userName,
+	hintCount,
 	passCount,
 	submitResult,
 	setSubmitResult,
@@ -45,6 +47,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 					selectedSetTitle,
 					userName,
 					clearTime: formatTime(elapsedTime),
+					hintCount,
 					passCount,
 				};
 				await sendToGAS(postData);
@@ -59,6 +62,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 		selectedSetTitle,
 		elapsedTime,
 		userName,
+		hintCount,
 		passCount,
 		refetch,
 		submitResult,
@@ -70,6 +74,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 			"#「Riddle Time Attack」を遊びました！",
 			`セット：${selectedSetTitle}`,
 			`タイム：${formatTimeHour(formatTime(elapsedTime))}`,
+			`ヒント回数：${hintCount}回`,
 			`パス回数：${passCount}回`,
 			"",
 			"みんなで結果を共有して競い合おう！",
@@ -91,6 +96,9 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 				<Box mt={2} textAlign="left" sx={{ mx: "auto", maxWidth: 300 }}>
 					<Typography variant="body1" sx={{ fontSize: "1.0rem" }}>
 						{`・タイム：${formatTimeHour(formatTime(elapsedTime))}`}
+					</Typography>
+					<Typography variant="body1" sx={{ fontSize: "1.0rem" }}>
+						{`・ヒント回数：${hintCount}回`}
 					</Typography>
 					<Typography variant="body1" sx={{ fontSize: "1.0rem" }}>
 						{`・パス回数：${passCount}回`}
