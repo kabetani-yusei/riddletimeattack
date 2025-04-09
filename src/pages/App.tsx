@@ -152,6 +152,9 @@ const App: React.FC = () => {
 										<br />
 										&nbsp;&nbsp;ただし、タイムに3分のペナルティがつきます
 									</Typography>
+									<Typography variant="body1" sx={{ fontSize: "0.9rem" }}>
+										・リロードや戻る操作は行わないでください
+									</Typography>
 									<Button
 										variant="contained"
 										onClick={() => setPage("puzzle")}
