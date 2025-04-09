@@ -1,6 +1,6 @@
 // src/ResultScreen.tsx
 import type React from "react";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import { useEffect, useRef } from "react";
 import { sendToGAS } from "../hooks/useSendToGAS";
 
@@ -106,14 +106,19 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 				</Box>
 			</Box>
 
-			<Button
-				variant="contained"
-				color="primary"
-				onClick={handleTweet}
-				sx={{ mt: 2 }}
-			>
-				Xで投稿(結果のみSNS投稿OKです)
-			</Button>
+			<Stack spacing={2} mt={2} alignItems="center">
+				<Button variant="contained" color="primary" onClick={handleTweet}>
+					Xで投稿(結果のみSNS投稿OKです)
+				</Button>
+
+				<Button
+					variant="outlined"
+					color="secondary"
+					onClick={() => window.location.reload()}
+				>
+					タイトルに戻る
+				</Button>
+			</Stack>
 		</Box>
 	);
 };
