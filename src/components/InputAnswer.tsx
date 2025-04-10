@@ -15,12 +15,19 @@ const InputAnswer: React.FC<Props> = ({ onSubmit }) => {
 		setInput("");
 	};
 
+	const handleKeyDown = (event: React.KeyboardEvent) => {
+		if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+			handleSubmit();
+		}
+	};
+
 	return (
 		<Box display="flex" alignItems="center" gap={2}>
 			<TextField
 				label="ひらがなで入力"
 				value={input}
 				onChange={(e) => setInput(e.target.value)}
+				onKeyDown={handleKeyDown}
 				size="small"
 				sx={{
 					"& .MuiInputBase-root": { height: 40 },
