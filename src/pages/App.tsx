@@ -1,251 +1,171 @@
 // src/App.tsx
 import type React from "react";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Container, Snackbar } from "@mui/material";
 import useFetchRanking from "../hooks/useFetchRanking";
-import {
-	Button,
-	Container,
-	Stack,
-	Typography,
-	Box,
-	FormControl,
-	RadioGroup,
-	FormLabel,
-	Radio,
-	FormControlLabel,
-	TextField,
-	Tabs,
-	Tab,
-} from "@mui/material";
+import usePersistentState from "../hooks/usePersistentState";
+import { preloadImages } from "../hooks/useImagePreload";
+import useBlockBackNavigation from "../hooks/useBlockBackNavigation";
 import PuzzleScreen from "./PuzzleScreen";
 import ResultScreen from "./ResultScreen";
-import { blue } from "@mui/material/colors";
+import HomeScreen from "./HomeScreen";
 import { riddleSets } from "../utils/riddleSets";
-import Ranking from "../components/Ranking";
+import { sendToGAS } from "../hooks/useSendToGAS";
+import { formatTime } from "../utils/time";
+import type { GameState, Page, RiddleSetKey } from "../utils/types";
 
-type Page = "home" | "puzzle" | "result";
-type RiddleSetKey = keyof typeof riddleSets;
-
-interface TabPanelProps {
-	children?: React.ReactNode;
-	index: number;
-	value: number;
-}
-
-function CustomTabPanel(props: TabPanelProps) {
-	const { children, value, index, ...other } = props;
-
-	return (
-		<div
-			role="tabpanel"
-			hidden={value !== index}
-			id={`simple-tabpanel-${index}`}
-			aria-labelledby={`simple-tab-${index}`}
-			{...other}
-		>
-			{value === index && <Box sx={{ p: 1 }}>{children}</Box>}
-		</div>
-	);
-}
-
-function a11yProps(index: number) {
-	return {
-		id: `simple-tab-${index}`,
-		"aria-controls": `simple-tabpanel-${index}`,
-	};
-}
+const createGame = (setKey: RiddleSetKey): GameState => ({
+	setKey,
+	index: 0,
+	startedAt: null,
+	penalty: 0,
+	hintShown: false,
+	hintCount: 0,
+	passCount: 0,
+	results: [],
+	finishedTime: null,
+	submitted: false,
+});
 
 const App: React.FC = () => {
-	const [page, setPage] = useState<Page>("home");
-	const [selectedSet, setSelectedSet] = useState<RiddleSetKey>("setA");
-	const [userName, setUserName] = useState("");
-	const [elapsedTime, setElapsedTime] = useState(0);
-	const [hintCount, setHintCount] = useState(0);
-	const [passCount, setPassCount] = useState(0);
-	const [submitResult, setSubmitResult] = useState(false);
-	const [outputSources, setOutputSources] = useState(0);
+	// 画面と進行状況はすべて保存し、リロードしても同じ画面に戻れるようにする
+	const [page, setPage] = usePersistentState<Page>("rta:page", "home");
+	const [game, setGame] = usePersistentState<GameState | null>(
+		"rta:game",
+		null,
+	);
+	const [selectedSet, setSelectedSet] = usePersistentState<RiddleSetKey>(
+		"rta:selectedSet",
+		"setA",
+	);
+	const [userName, setUserName] = usePersistentState(
+		"rta:userName",
+		"",
+		"local",
+	);
+	const [homeTab, setHomeTab] = usePersistentState("rta:homeTab", 0);
+	const [rankingSet, setRankingSet] = usePersistentState<RiddleSetKey>(
+		"rta:rankingSet",
+		"setA",
+	);
 
-	// ホーム画面用の状態
-	const [homeTab, setHomeTab] = useState<number>(0);
-	const [rankingSet, setRankingSet] = useState<RiddleSetKey>("setA");
+	// ランキングは起動時に取得し、キャッシュを即座に表示する
+	const ranking = useFetchRanking();
+	const { refetch } = ranking;
 
-	// useFetchRanking フックからランキングデータ、loading、refetch を取得
-	const { rankingData, loading, refetch } = useFetchRanking();
+	// 選択中のセットを優先して、すべての問題画像を先読みしておく
+	useEffect(() => {
+		const keys = Object.keys(riddleSets) as RiddleSetKey[];
+		const ordered = [selectedSet, ...keys.filter((k) => k !== selectedSet)];
+		ordered.reduce<Promise<unknown>>(
+			(prev, key) => prev.then(() => preloadImages(riddleSets[key].images)),
+			Promise.resolve(),
+		);
+	}, [selectedSet]);
+
+	// 保存されていた状態が不整合ならホームに戻す
+	const validGame = game && game.setKey in riddleSets ? game : null;
+	const currentPage: Page = page !== "home" && !validGame ? "home" : page;
+
+	// プレイ中・結果画面ではブラウザの戻る操作を無効にする
+	const [backBlocked, setBackBlocked] = useState(false);
+	useBlockBackNavigation(currentPage !== "home", () => setBackBlocked(true));
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: 画面切り替え時にスクロール位置を戻す
+	useEffect(() => {
+		window.scrollTo(0, 0);
+	}, [currentPage]);
+
+	const handleStart = () => {
+		if (!userName.trim()) return;
+		setUserName(userName.trim());
+		setGame(createGame(selectedSet));
+		setRankingSet(selectedSet);
+		setPage("puzzle");
+		// 終了後すぐに表示できるよう、開始時点でランキングを取得しておく
+		refetch();
+	};
+
+	const handleFinish = useCallback(() => setPage("result"), [setPage]);
+
+	const handleBackToTitle = () => {
+		setGame(null);
+		setPage("home");
+		setHomeTab(0);
+	};
+
+	// クリアしたら結果を一度だけ送信し、ランキングを更新する
+	const sendingRef = useRef(false);
+	useEffect(() => {
+		if (!validGame || validGame.finishedTime == null || validGame.submitted)
+			return;
+		if (sendingRef.current) return;
+		sendingRef.current = true;
+		setGame((prev) => (prev ? { ...prev, submitted: true } : prev));
+		sendToGAS({
+			selectedSetTitle: riddleSets[validGame.setKey].title,
+			userName,
+			clearTime: formatTime(validGame.finishedTime),
+			hintCount: validGame.hintCount,
+			passCount: validGame.passCount,
+		}).finally(() => {
+			sendingRef.current = false;
+			refetch();
+		});
+	}, [validGame, userName, setGame, refetch]);
 
 	return (
-		<Box
+		<Container
+			maxWidth={false}
 			sx={{
-				minHeight: "100vh",
-				backgroundColor: blue[50],
-				display: "flex",
-				alignItems: "center",
-				justifyContent: "center",
+				maxWidth: currentPage === "puzzle" ? 640 : 520,
+				px: { xs: 2, sm: 3 },
 			}}
 		>
-			<Container maxWidth="sm" sx={{ width: "100%", maxWidth: "400px" }}>
-				<Stack spacing={1} p={4} bgcolor="white" borderRadius={2} boxShadow={1}>
-					<Typography
-						variant="h5"
-						align="center"
-						gutterBottom
-						sx={{
-							fontWeight: "bold",
-							color: blue[700],
-						}}
-					>
-						Riddle Time Attack
-					</Typography>
-					{page === "home" && (
-						<>
-							<Tabs
-								value={homeTab}
-								onChange={(_event, newValue) => setHomeTab(newValue)}
-								centered
-							>
-								<Tab label="ホーム" {...a11yProps(0)} />
-								<Tab label="ランキング" {...a11yProps(1)} />
-							</Tabs>
-							<CustomTabPanel value={homeTab} index={0}>
-								<Stack direction="column" spacing={2} mb={2}>
-									<FormControl component="fieldset">
-										<FormLabel component="legend">謎セットを選択</FormLabel>
-										<RadioGroup
-											row
-											value={selectedSet}
-											onChange={(e) =>
-												setSelectedSet(e.target.value as RiddleSetKey)
-											}
-										>
-											{Object.entries(riddleSets).map(([key, setContent]) => (
-												<FormControlLabel
-													key={key}
-													value={key}
-													control={<Radio />}
-													label={setContent.title}
-												/>
-											))}
-										</RadioGroup>
-									</FormControl>
-									<TextField
-										required
-										error={!userName}
-										label="ランキング掲載用のユーザー名"
-										value={userName}
-										onChange={(e) => setUserName(e.target.value)}
-										fullWidth
-										size="small"
-										sx={{ mt: 0 }}
-									/>
-									<Typography variant="body1" sx={{ fontSize: "0.9rem" }}>
-										・全10問の謎を解ききるまでのタイムを競います
-									</Typography>
-									<Typography variant="body1" sx={{ fontSize: "0.9rem" }}>
-										・答えは全てひらがなで入力してください
-									</Typography>
-									<Typography variant="body1" sx={{ fontSize: "0.9rem" }}>
-										・謎がわからない場合はヒントを見ることができます
-										<br />
-										&nbsp;&nbsp;ただし、タイムに1分のペナルティがつきます
-									</Typography>
-									<Typography variant="body1" sx={{ fontSize: "0.9rem" }}>
-										・ヒントを見ても分からない場合はパスをしてください
-										<br />
-										&nbsp;&nbsp;ただし、タイムに3分のペナルティがつきます
-									</Typography>
-									<Typography variant="body1" sx={{ fontSize: "0.9rem" }}>
-										・リロードや戻る操作は行わないでください
-									</Typography>
-									<Button
-										variant="contained"
-										onClick={() => setPage("puzzle")}
-										sx={{ mt: 0 }}
-										disabled={!userName}
-									>
-										スタート
-									</Button>
-								</Stack>
-							</CustomTabPanel>
-							<CustomTabPanel value={homeTab} index={1}>
-								{/* ランキング上部に問題セット選択用のラジオボタン */}
-								<Box mb={2}>
-									<FormControl component="fieldset">
-										<FormLabel component="legend">問題セットを選択</FormLabel>
-										<RadioGroup
-											row
-											value={rankingSet}
-											onChange={(e) =>
-												setRankingSet(e.target.value as RiddleSetKey)
-											}
-										>
-											{Object.entries(riddleSets).map(([key, setContent]) => (
-												<FormControlLabel
-													key={key}
-													value={key}
-													control={<Radio />}
-													label={setContent.title}
-												/>
-											))}
-										</RadioGroup>
-									</FormControl>
-								</Box>
-								<Ranking
-									selectedSetTitle={riddleSets[rankingSet].title}
-									rankingItem={rankingData}
-									loading={loading}
-									refetch={refetch}
-								/>
-							</CustomTabPanel>
-						</>
-					)}
-					{page === "puzzle" && (
-						<PuzzleScreen
-							content={riddleSets[selectedSet]}
-							setElapsedTime={setElapsedTime}
-							setHintCount={setHintCount}
-							passCount={passCount}
-							setPassCount={setPassCount}
-							setPage={setPage}
-						/>
-					)}
-					{page === "result" && (
-						<>
-							<Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-								<Tabs
-									value={outputSources}
-									onChange={(_event, newValue) => setOutputSources(newValue)}
-									centered
-								>
-									<Tab label="結果" {...a11yProps(0)} />
-									<Tab label="ランキング" {...a11yProps(1)} />
-								</Tabs>
-							</Box>
-							<CustomTabPanel value={outputSources} index={0}>
-								<CustomTabPanel value={outputSources} index={0}>
-									<ResultScreen
-										selectedSetTitle={riddleSets[selectedSet].title}
-										elapsedTime={elapsedTime}
-										userName={userName}
-										hintCount={hintCount}
-										passCount={passCount}
-										submitResult={submitResult}
-										setSubmitResult={setSubmitResult}
-										refetch={refetch}
-									/>
-								</CustomTabPanel>
-							</CustomTabPanel>
-							<CustomTabPanel value={outputSources} index={1}>
-								<Ranking
-									selectedSetTitle={riddleSets[selectedSet].title}
-									rankingItem={rankingData}
-									loading={loading}
-									refetch={refetch}
-								/>
-							</CustomTabPanel>
-						</>
-					)}
-				</Stack>
-			</Container>
-		</Box>
+			{currentPage === "home" && (
+				<HomeScreen
+					tab={homeTab}
+					setTab={setHomeTab}
+					selectedSet={selectedSet}
+					setSelectedSet={setSelectedSet}
+					rankingSet={rankingSet}
+					setRankingSet={setRankingSet}
+					userName={userName}
+					setUserName={setUserName}
+					onStart={handleStart}
+					ranking={ranking}
+				/>
+			)}
+			{currentPage === "puzzle" && validGame && (
+				<PuzzleScreen
+					content={riddleSets[validGame.setKey]}
+					game={validGame}
+					setGame={setGame}
+					onFinish={handleFinish}
+				/>
+			)}
+			{currentPage === "result" && validGame && (
+				<ResultScreen
+					game={validGame}
+					userName={userName}
+					ranking={ranking}
+					rankingSet={rankingSet}
+					setRankingSet={setRankingSet}
+					onBackToTitle={handleBackToTitle}
+				/>
+			)}
+			<Snackbar
+				open={backBlocked}
+				autoHideDuration={2500}
+				onClose={() => setBackBlocked(false)}
+				message={
+					currentPage === "puzzle"
+						? "プレイ中は戻る操作はできません"
+						: "「タイトルに戻る」ボタンからホームに戻れます"
+				}
+				anchorOrigin={{ vertical: "top", horizontal: "center" }}
+			/>
+		</Container>
 	);
 };
 
