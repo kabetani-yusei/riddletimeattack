@@ -1,6 +1,7 @@
 import type React from "react";
 import { useCallback, useEffect, useState } from "react";
 import { Box, Button, Dialog, IconButton, Typography } from "@mui/material";
+import { keyframes } from "@emotion/react";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LightbulbIcon from "@mui/icons-material/Lightbulb";
 import SkipNextRoundedIcon from "@mui/icons-material/SkipNextRounded";
@@ -19,6 +20,22 @@ import {
 import type { GameState, RiddleSetsType } from "../utils/types";
 import { HINT_PENALTY_MS, PASS_PENALTY_MS } from "../utils/constants";
 import useImagePreload from "../hooks/useImagePreload";
+
+// ペナルティ表示：タイマーの真下にふわっと浮かび上がり、そのままタイマーに吸い込まれる
+const penaltyFly = keyframes`
+  0% { transform: translate(-50%, calc(-50% + 56px)) scale(0.5); opacity: 0; }
+  18% { transform: translate(-50%, calc(-50% + 46px)) scale(1.2); opacity: 1; }
+  30% { transform: translate(-50%, calc(-50% + 46px)) scale(1); opacity: 1; }
+  55% { transform: translate(-50%, calc(-50% + 42px)) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+`;
+
+// ペナルティが吸い込まれた瞬間にタイマーを光らせる
+const timerHit = keyframes`
+  0% { transform: scale(1); opacity: 0; }
+  30% { transform: scale(1.12); opacity: 1; }
+  100% { transform: scale(1.25); opacity: 0; }
+`;
 
 interface PuzzleScreenProps {
 	content: RiddleSetsType;
@@ -59,8 +76,7 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 				? { ...prev, startedAt: Date.now() }
 				: prev,
 		);
-		playEffect("start");
-	}, [setGame, playEffect]);
+	}, [setGame]);
 
 	const goNext = (result: "correct" | "pass", extraPenalty: number) => {
 		const isLast = game.index + 1 >= total;
@@ -177,8 +193,50 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 						borderRadius: 999,
 						bgcolor: "rgba(0,0,0,0.25)",
 						border: "1px solid rgba(255,255,255,0.2)",
+						position: "relative",
 					}}
 				>
+					{/* ペナルティ演出はヘッダー内だけで完結させ、問題画像・解答欄には重ねない */}
+					{(effect?.kind === "hint" || effect?.kind === "pass") && (
+						<>
+							<Typography
+								key={`fly-${effect.id}`}
+								sx={{
+									position: "absolute",
+									left: "50%",
+									top: "50%",
+									zIndex: 2,
+									fontWeight: 900,
+									fontSize: "2rem",
+									lineHeight: 1,
+									fontVariantNumeric: "tabular-nums",
+									color: effect.kind === "pass" ? "#fca5a5" : "#fde68a",
+									WebkitTextStroke: "1px rgba(0,0,0,0.25)",
+									textShadow: `0 0 12px ${effect.kind === "pass" ? "rgba(239,68,68,0.9)" : "rgba(245,158,11,0.9)"}, 0 3px 8px rgba(0,0,0,0.5)`,
+									pointerEvents: "none",
+									whiteSpace: "nowrap",
+									animation: `${penaltyFly} ${EFFECT_DURATIONS[effect.kind]}ms cubic-bezier(.5,0,.3,1) both`,
+								}}
+							>
+								{effect.kind === "pass" ? "+3分" : "+1分"}
+							</Typography>
+							<Box
+								key={`hit-${effect.id}`}
+								sx={{
+									position: "absolute",
+									inset: -2,
+									borderRadius: 999,
+									pointerEvents: "none",
+									border: `2px solid ${effect.kind === "pass" ? "#ef4444" : "#f59e0b"}`,
+									bgcolor:
+										effect.kind === "pass"
+											? "rgba(239,68,68,0.3)"
+											: "rgba(245,158,11,0.3)",
+									animation: `${timerHit} 450ms ease-out ${Math.round(EFFECT_DURATIONS[effect.kind] * 0.85)}ms both`,
+								}}
+							/>
+						</>
+					)}
 					<AccessTimeIcon fontSize="small" />
 					<Stopwatch
 						startedAt={game.startedAt}
@@ -260,26 +318,27 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 				</Box>
 			</Box>
 
-			{game.hintShown && (
-				<Box
-					display="flex"
-					alignItems="center"
-					gap={1}
-					sx={{
-						bgcolor: "#fff8e1",
-						color: "text.primary",
-						borderLeft: "5px solid #f59e0b",
-						borderRadius: 2,
-						px: 1.5,
-						py: 1,
-					}}
-				>
-					<LightbulbIcon sx={{ color: "#f59e0b" }} />
-					<Typography sx={{ fontSize: "0.95rem", fontWeight: 600 }}>
-						{content.hints[displayIndex]}
-					</Typography>
-				</Box>
-			)}
+			{/* ヒント欄は最初から場所を確保しておき、表示しても問題画像の大きさを変えない */}
+			<Box
+				display="flex"
+				alignItems="center"
+				gap={1}
+				sx={{
+					minHeight: 64,
+					borderRadius: 2,
+					px: 1.5,
+					py: 1,
+					visibility: game.hintShown ? "visible" : "hidden",
+					bgcolor: "#fff8e1",
+					color: "text.primary",
+					borderLeft: "5px solid #f59e0b",
+				}}
+			>
+				<LightbulbIcon sx={{ color: "#f59e0b" }} />
+				<Typography sx={{ fontSize: "0.95rem", fontWeight: 600 }}>
+					{game.hintShown ? content.hints[displayIndex] : ""}
+				</Typography>
+			</Box>
 
 			<InputAnswer onSubmit={handleAnswerSubmit} />
 
@@ -291,6 +350,9 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 					disabled={game.hintShown || finished}
 					startIcon={<LightbulbIcon />}
 					sx={{
+						whiteSpace: "nowrap",
+						px: 1,
+						fontSize: { xs: "0.85rem", sm: "0.9rem" },
 						color: "white",
 						borderColor: "rgba(255,255,255,0.5)",
 						"&:hover": {
@@ -312,6 +374,9 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 					disabled={!game.hintShown || finished}
 					startIcon={<SkipNextRoundedIcon />}
 					sx={{
+						whiteSpace: "nowrap",
+						px: 1,
+						fontSize: { xs: "0.85rem", sm: "0.9rem" },
 						color: "#fecaca",
 						borderColor: "rgba(254,202,202,0.6)",
 						"&:hover": {

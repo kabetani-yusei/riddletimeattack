@@ -45,13 +45,18 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 		game.hintCount * HINT_PENALTY_MS + game.passCount * PASS_PENALTY_MS;
 	const correctCount = game.results.filter((r) => r === "correct").length;
 
-	const myEntry: RankingItem = useMemo(
-		() => ({
-			selectedSetTitle: content.title,
-			userName,
-			elapsedTime: formatTime(elapsedTime),
-		}),
-		[content.title, userName, elapsedTime],
+	// 名前なしで遊んだ場合はランキングに載らないので、自分の記録も表示しない
+	const ranked = game.ranked !== false;
+	const myEntry: RankingItem | undefined = useMemo(
+		() =>
+			ranked
+				? {
+						selectedSetTitle: content.title,
+						userName,
+						elapsedTime: formatTime(elapsedTime),
+					}
+				: undefined,
+		[ranked, content.title, userName, elapsedTime],
 	);
 	const { myIndex } = useMemo(
 		() => rankEntries(content.title, ranking.rankingData, myEntry),
@@ -116,7 +121,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 					CLEAR!
 				</Typography>
 				<Typography sx={{ mt: 1, opacity: 0.85, fontWeight: 700 }}>
-					{content.title}・{userName} さん
+					{content.title}・{ranked ? `${userName} さん` : "ランキング対象外"}
 				</Typography>
 			</Box>
 
@@ -158,8 +163,8 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 					{stat("パス", `${game.passCount}回`)}
 					{stat(
 						"順位",
-						myIndex >= 0 ? `${myIndex + 1}位` : "-",
-						ranking.loading ? "更新中…" : undefined,
+						!ranked ? "対象外" : myIndex >= 0 ? `${myIndex + 1}位` : "-",
+						ranked && ranking.loading ? "更新中…" : undefined,
 					)}
 				</Box>
 				<Stack spacing={1.2} mt={2.5}>

@@ -25,4 +25,6 @@ export interface GameState {
 	results: QuestionResult[];
 	finishedTime: number | null;
 	submitted: boolean;
+	// false ならランキングに送信しない（名前なしで遊ぶモード）。古い保存データでは未定義
+	ranked?: boolean;
 }

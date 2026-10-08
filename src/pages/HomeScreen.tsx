@@ -35,7 +35,7 @@ interface Props {
 	setRankingSet: (key: RiddleSetKey) => void;
 	userName: string;
 	setUserName: (name: string) => void;
-	onStart: () => void;
+	onStart: (ranked: boolean) => void;
 	ranking: ReturnType<typeof useFetchRanking>;
 }
 
@@ -226,14 +226,14 @@ const HomeScreen: React.FC<Props> = ({
 									e.keyCode !== 229 &&
 									trimmedName
 								) {
-									onStart();
+									onStart(true);
 								}
 							}}
 							fullWidth
 							helperText={
 								trimmedName
 									? `${userName.length}/${USER_NAME_MAX}`
-									: "ユーザー名を入力するとスタートできます"
+									: "ユーザー名を入力するとランキングに参加できます"
 							}
 							slotProps={{
 								formHelperText: {
@@ -268,13 +268,28 @@ const HomeScreen: React.FC<Props> = ({
 							variant="contained"
 							color="secondary"
 							size="large"
-							onClick={onStart}
+							onClick={() => onStart(true)}
 							disabled={!trimmedName}
 							startIcon={<PlayArrowRoundedIcon />}
 							sx={{ fontSize: "1.2rem", py: 1.5 }}
 						>
 							スタート
 						</Button>
+						<Button
+							variant="outlined"
+							onClick={() => onStart(false)}
+							sx={{ mt: "12px !important" }}
+						>
+							ランキングに載せずに遊ぶ
+						</Button>
+						<Typography
+							variant="caption"
+							color="text.secondary"
+							textAlign="center"
+							sx={{ mt: "4px !important" }}
+						>
+							名前の入力は不要です。2周目や練習にどうぞ
+						</Typography>
 						{!preload.done && (
 							<Typography
 								variant="caption"
