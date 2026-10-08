@@ -6,6 +6,7 @@ import {
 	Stack,
 	Tab,
 	Tabs,
+	Switch,
 	TextField,
 	ToggleButton,
 	ToggleButtonGroup,
@@ -35,6 +36,8 @@ interface Props {
 	setRankingSet: (key: RiddleSetKey) => void;
 	userName: string;
 	setUserName: (name: string) => void;
+	rankedMode: boolean;
+	setRankedMode: (ranked: boolean) => void;
 	onStart: (ranked: boolean) => void;
 	ranking: ReturnType<typeof useFetchRanking>;
 }
@@ -88,10 +91,14 @@ const HomeScreen: React.FC<Props> = ({
 	setRankingSet,
 	userName,
 	setUserName,
+	rankedMode,
+	setRankedMode,
 	onStart,
 	ranking,
 }) => {
 	const trimmedName = userName.trim();
+	// ランキング参加モードでは名前が必須
+	const canStart = !rankedMode || trimmedName.length > 0;
 	// 選択中のセットの画像を先に読み込んでおく
 	const preload = useImagePreload(riddleSets[selectedSet].images);
 
@@ -212,35 +219,61 @@ const HomeScreen: React.FC<Props> = ({
 								))}
 							</ToggleButtonGroup>
 						</Box>
-						<TextField
-							required
-							label="ランキング掲載用のユーザー名"
-							value={userName}
-							onChange={(e) =>
-								setUserName(e.target.value.slice(0, USER_NAME_MAX))
-							}
-							onKeyDown={(e) => {
-								if (
-									e.key === "Enter" &&
-									!e.nativeEvent.isComposing &&
-									e.keyCode !== 229 &&
-									trimmedName
-								) {
-									onStart(true);
-								}
+						{/* ランキング参加の有無と名前入力はひとまとまりにする */}
+						<Box
+							sx={{
+								border: "1px solid",
+								borderColor: "divider",
+								borderRadius: 3,
+								p: 2,
 							}}
-							fullWidth
-							helperText={
-								trimmedName
-									? `${userName.length}/${USER_NAME_MAX}`
-									: "ユーザー名を入力するとランキングに参加できます"
-							}
-							slotProps={{
-								formHelperText: {
-									sx: { textAlign: trimmedName ? "right" : "left" },
-								},
-							}}
-						/>
+						>
+							<Box
+								component="label"
+								display="flex"
+								alignItems="center"
+								justifyContent="space-between"
+								sx={{ cursor: "pointer" }}
+							>
+								<Box>
+									<Typography sx={{ fontWeight: 800 }}>
+										ランキングに参加する
+									</Typography>
+									<Typography variant="caption" color="text.secondary">
+										{rankedMode
+											? "結果がランキングに載ります"
+											: "名前なしで遊べます（練習・2周目向け）"}
+									</Typography>
+								</Box>
+								<Switch
+									checked={rankedMode}
+									onChange={(e) => setRankedMode(e.target.checked)}
+									inputProps={{ "aria-label": "ランキングに参加する" }}
+								/>
+							</Box>
+							{rankedMode && (
+								<TextField
+									required
+									label="ユーザー名"
+									value={userName}
+									onChange={(e) =>
+										setUserName(e.target.value.slice(0, USER_NAME_MAX))
+									}
+									fullWidth
+									sx={{ mt: 2 }}
+									helperText={
+										trimmedName
+											? `${userName.length}/${USER_NAME_MAX}`
+											: "ランキングに載せる名前を入力"
+									}
+									slotProps={{
+										formHelperText: {
+											sx: { textAlign: trimmedName ? "right" : "left" },
+										},
+									}}
+								/>
+							)}
+						</Box>
 						<Stack
 							spacing={1.2}
 							sx={{ bgcolor: "grey.50", borderRadius: 3, p: 2 }}
@@ -264,32 +297,18 @@ const HomeScreen: React.FC<Props> = ({
 								</Box>
 							))}
 						</Stack>
+						{/* 名前の入力途中で始まらないよう、スタートはボタンでのみ行う */}
 						<Button
 							variant="contained"
 							color="secondary"
 							size="large"
-							onClick={() => onStart(true)}
-							disabled={!trimmedName}
+							onClick={() => onStart(rankedMode)}
+							disabled={!canStart}
 							startIcon={<PlayArrowRoundedIcon />}
 							sx={{ fontSize: "1.2rem", py: 1.5 }}
 						>
 							スタート
 						</Button>
-						<Button
-							variant="outlined"
-							onClick={() => onStart(false)}
-							sx={{ mt: "12px !important" }}
-						>
-							ランキングに載せずに遊ぶ
-						</Button>
-						<Typography
-							variant="caption"
-							color="text.secondary"
-							textAlign="center"
-							sx={{ mt: "4px !important" }}
-						>
-							名前の入力は不要です。2周目や練習にどうぞ
-						</Typography>
 						{!preload.done && (
 							<Typography
 								variant="caption"
