@@ -1,16 +1,16 @@
 // src/constants/riddleSets/set2.ts
 import type { RiddleSetsType } from "../types";
 
-import image1 from "../../assets/images/setB/image1.png";
-import image2 from "../../assets/images/setB/image2.png";
-import image3 from "../../assets/images/setB/image3.png";
-import image4 from "../../assets/images/setB/image4.png";
-import image5 from "../../assets/images/setB/image5.png";
-import image6 from "../../assets/images/setB/image6.png";
-import image7 from "../../assets/images/setB/image7.png";
-import image8 from "../../assets/images/setB/image8.png";
-import image9 from "../../assets/images/setB/image9.png";
-import image10 from "../../assets/images/setB/image10.png";
+import image1 from "../../assets/images/setB/image1.webp";
+import image2 from "../../assets/images/setB/image2.webp";
+import image3 from "../../assets/images/setB/image3.webp";
+import image4 from "../../assets/images/setB/image4.webp";
+import image5 from "../../assets/images/setB/image5.webp";
+import image6 from "../../assets/images/setB/image6.webp";
+import image7 from "../../assets/images/setB/image7.webp";
+import image8 from "../../assets/images/setB/image8.webp";
+import image9 from "../../assets/images/setB/image9.webp";
+import image10 from "../../assets/images/setB/image10.webp";
 
 export const setB: RiddleSetsType = {
 	title: "セットB",

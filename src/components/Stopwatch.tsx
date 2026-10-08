@@ -1,74 +1,53 @@
 import type React from "react";
-import { useEffect, useState, useRef } from "react";
-import { Typography } from "@mui/material";
+import { useEffect, useState } from "react";
+import { Typography, type TypographyProps } from "@mui/material";
+import { formatClock } from "../utils/time";
 
 interface Props {
-	running: boolean;
-	additionalTime?: number;
-	onTimeUpdate?: (elapsed: number) => void;
-	onComplete?: () => void;
+	startedAt: number | null;
+	penalty: number;
+	// 停止後の確定タイム
+	finishedTime: number | null;
+	sx?: TypographyProps["sx"];
 }
 
+// 開始時刻からの経過時間を表示する（リロードしても開始時刻から再計算される）
 const Stopwatch: React.FC<Props> = ({
-	running,
-	additionalTime = 0,
-	onTimeUpdate,
-	onComplete,
+	startedAt,
+	penalty,
+	finishedTime,
+	sx,
 }) => {
-	const [elapsed, setElapsed] = useState(0);
-	const startTimeRef = useRef<number | null>(null);
-	const intervalRef = useRef<number | null>(null);
-	// これまでに加算した追加時間を記録する ref
-	const lastAdditionalRef = useRef(0);
+	const [now, setNow] = useState(() => Date.now());
+	const running = startedAt != null && finishedTime == null;
 
 	useEffect(() => {
-		// 追加時間の更新があったとき、前回との差分だけ加算する
-		const delta = additionalTime - lastAdditionalRef.current;
-		if (delta > 0) {
-			setElapsed((prev) => {
-				const newElapsed = prev + delta;
-				if (startTimeRef.current) {
-					startTimeRef.current = Date.now() - newElapsed;
-				}
-				return newElapsed;
-			});
-			lastAdditionalRef.current = additionalTime;
-		}
-	}, [additionalTime]);
-
-	useEffect(() => {
-		if (running) {
-			startTimeRef.current = Date.now() - elapsed;
-			intervalRef.current = window.setInterval(() => {
-				const newElapsed = Date.now() - (startTimeRef.current as number);
-				setElapsed(newElapsed);
-				if (onTimeUpdate) onTimeUpdate(newElapsed);
-			}, 10);
-		} else if (intervalRef.current) {
-			clearInterval(intervalRef.current);
-		}
-		return () => {
-			if (intervalRef.current) clearInterval(intervalRef.current);
+		if (!running) return;
+		let frame = 0;
+		const tick = () => {
+			setNow(Date.now());
+			frame = requestAnimationFrame(tick);
 		};
-	}, [running, elapsed, onTimeUpdate]);
+		frame = requestAnimationFrame(tick);
+		return () => cancelAnimationFrame(frame);
+	}, [running]);
 
-	useEffect(() => {
-		if (!running && intervalRef.current) {
-			clearInterval(intervalRef.current);
-			intervalRef.current = null;
-			if (onComplete) onComplete();
-		}
-	}, [running, onComplete]);
+	const elapsed =
+		finishedTime ?? (startedAt == null ? penalty : now - startedAt + penalty);
 
-	const formatTime = (ms: number) => {
-		const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
-		const minutes = Math.floor((ms / (1000 * 60)) % 60);
-		const seconds = Math.floor((ms / 1000) % 60);
-		const milliseconds = Math.floor((ms % 1000) / 10);
-		return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.${String(milliseconds).padStart(2, "0")}`;
-	};
-
-	return <Typography variant="h5">{formatTime(elapsed)}</Typography>;
+	return (
+		<Typography
+			component="span"
+			sx={{
+				fontVariantNumeric: "tabular-nums",
+				fontWeight: 800,
+				letterSpacing: "0.02em",
+				...sx,
+			}}
+		>
+			{formatClock(elapsed)}
+		</Typography>
+	);
 };
 
 export default Stopwatch;
