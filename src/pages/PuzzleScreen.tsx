@@ -21,12 +21,12 @@ import type { GameState, RiddleSetsType } from "../utils/types";
 import { HINT_PENALTY_MS, PASS_PENALTY_MS } from "../utils/constants";
 import useImagePreload from "../hooks/useImagePreload";
 
-// ペナルティ表示：タイマーの左下にふわっと浮かび上がり、タイマーに吸い込まれる
+// ペナルティ表示：タイマーの真下にふわっと浮かび上がり、そのままタイマーに吸い込まれる
 const penaltyFly = keyframes`
-  0% { transform: translate(calc(-50% - 110px), calc(-50% + 48px)) scale(0.5); opacity: 0; }
-  18% { transform: translate(calc(-50% - 110px), calc(-50% + 38px)) scale(1.2); opacity: 1; }
-  30% { transform: translate(calc(-50% - 110px), calc(-50% + 38px)) scale(1); opacity: 1; }
-  55% { transform: translate(calc(-50% - 110px), calc(-50% + 34px)) scale(1); opacity: 1; }
+  0% { transform: translate(-50%, calc(-50% + 56px)) scale(0.5); opacity: 0; }
+  18% { transform: translate(-50%, calc(-50% + 46px)) scale(1.2); opacity: 1; }
+  30% { transform: translate(-50%, calc(-50% + 46px)) scale(1); opacity: 1; }
+  55% { transform: translate(-50%, calc(-50% + 42px)) scale(1); opacity: 1; }
   100% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
 `;
 
