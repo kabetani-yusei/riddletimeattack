@@ -72,7 +72,8 @@ const InputAnswer: React.FC<Props> = ({ onSubmit }) => {
 				}}
 				onKeyDown={handleKeyDown}
 				error={isWrong}
-				helperText={isWrong ? "不正解です。もう一度考えてみよう" : undefined}
+				// 不正解メッセージの行も常に確保して、表示時にレイアウトがずれないようにする
+				helperText={isWrong ? "不正解です" : " "}
 				autoComplete="off"
 				fullWidth
 				slotProps={{
@@ -89,6 +90,7 @@ const InputAnswer: React.FC<Props> = ({ onSubmit }) => {
 							mt: 0.5,
 							px: 1.5,
 							fontWeight: 700,
+							whiteSpace: "nowrap",
 							color: "#fecaca !important",
 						},
 					},

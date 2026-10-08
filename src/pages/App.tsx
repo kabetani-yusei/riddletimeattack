@@ -14,7 +14,7 @@ import { sendToGAS } from "../hooks/useSendToGAS";
 import { formatTime } from "../utils/time";
 import type { GameState, Page, RiddleSetKey } from "../utils/types";
 
-const createGame = (setKey: RiddleSetKey): GameState => ({
+const createGame = (setKey: RiddleSetKey, ranked: boolean): GameState => ({
 	setKey,
 	index: 0,
 	startedAt: null,
@@ -25,6 +25,7 @@ const createGame = (setKey: RiddleSetKey): GameState => ({
 	results: [],
 	finishedTime: null,
 	submitted: false,
+	ranked,
 });
 
 const App: React.FC = () => {
@@ -76,10 +77,11 @@ const App: React.FC = () => {
 		window.scrollTo(0, 0);
 	}, [currentPage]);
 
-	const handleStart = () => {
-		if (!userName.trim()) return;
+	// ranked が false のときは名前なしで遊べる（ランキングには掲載しない）
+	const handleStart = (ranked: boolean) => {
+		if (ranked && !userName.trim()) return;
 		setUserName(userName.trim());
-		setGame(createGame(selectedSet));
+		setGame(createGame(selectedSet, ranked));
 		setRankingSet(selectedSet);
 		setPage("puzzle");
 		// 終了後すぐに表示できるよう、開始時点でランキングを取得しておく
@@ -97,7 +99,12 @@ const App: React.FC = () => {
 	// クリアしたら結果を一度だけ送信し、ランキングを更新する
 	const sendingRef = useRef(false);
 	useEffect(() => {
-		if (!validGame || validGame.finishedTime == null || validGame.submitted)
+		if (
+			!validGame ||
+			validGame.ranked === false ||
+			validGame.finishedTime == null ||
+			validGame.submitted
+		)
 			return;
 		if (sendingRef.current) return;
 		sendingRef.current = true;
