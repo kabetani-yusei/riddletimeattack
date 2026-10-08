@@ -70,7 +70,12 @@ const rules: { icon: React.ReactNode; text: React.ReactNode }[] = [
 	},
 	{
 		icon: <RestartAltOutlinedIcon />,
-		text: "リロードしても続きから再開できます（タイマーは止まりません）",
+		text: (
+			<>
+				リロードしても続きから再開できます（タイマーは止まりません）。
+				プレイ中はブラウザの戻る操作は使えません
+			</>
+		),
 	},
 ];
 

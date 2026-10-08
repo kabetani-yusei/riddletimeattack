@@ -1,10 +1,11 @@
 // src/App.tsx
 import type React from "react";
-import { useCallback, useEffect, useRef } from "react";
-import { Container } from "@mui/material";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Container, Snackbar } from "@mui/material";
 import useFetchRanking from "../hooks/useFetchRanking";
 import usePersistentState from "../hooks/usePersistentState";
 import { preloadImages } from "../hooks/useImagePreload";
+import useBlockBackNavigation from "../hooks/useBlockBackNavigation";
 import PuzzleScreen from "./PuzzleScreen";
 import ResultScreen from "./ResultScreen";
 import HomeScreen from "./HomeScreen";
@@ -65,6 +66,10 @@ const App: React.FC = () => {
 	// 保存されていた状態が不整合ならホームに戻す
 	const validGame = game && game.setKey in riddleSets ? game : null;
 	const currentPage: Page = page !== "home" && !validGame ? "home" : page;
+
+	// プレイ中・結果画面ではブラウザの戻る操作を無効にする
+	const [backBlocked, setBackBlocked] = useState(false);
+	useBlockBackNavigation(currentPage !== "home", () => setBackBlocked(true));
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: 画面切り替え時にスクロール位置を戻す
 	useEffect(() => {
@@ -149,6 +154,17 @@ const App: React.FC = () => {
 					onBackToTitle={handleBackToTitle}
 				/>
 			)}
+			<Snackbar
+				open={backBlocked}
+				autoHideDuration={2500}
+				onClose={() => setBackBlocked(false)}
+				message={
+					currentPage === "puzzle"
+						? "プレイ中は戻る操作はできません"
+						: "「タイトルに戻る」ボタンからホームに戻れます"
+				}
+				anchorOrigin={{ vertical: "top", horizontal: "center" }}
+			/>
 		</Container>
 	);
 };
