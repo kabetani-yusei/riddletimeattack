@@ -1,6 +1,7 @@
 import type React from "react";
 import { useCallback, useEffect, useState } from "react";
 import { Box, Button, Dialog, IconButton, Typography } from "@mui/material";
+import { keyframes } from "@emotion/react";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LightbulbIcon from "@mui/icons-material/Lightbulb";
 import SkipNextRoundedIcon from "@mui/icons-material/SkipNextRounded";
@@ -19,6 +20,13 @@ import {
 import type { GameState, RiddleSetsType } from "../utils/types";
 import { HINT_PENALTY_MS, PASS_PENALTY_MS } from "../utils/constants";
 import useImagePreload from "../hooks/useImagePreload";
+
+const penaltyFloat = keyframes`
+  0% { transform: translateY(-4px); opacity: 0; }
+  15% { transform: translateY(0); opacity: 1; }
+  75% { opacity: 1; }
+  100% { transform: translateY(4px); opacity: 0; }
+`;
 
 interface PuzzleScreenProps {
 	content: RiddleSetsType;
@@ -59,8 +67,7 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 				? { ...prev, startedAt: Date.now() }
 				: prev,
 		);
-		playEffect("start");
-	}, [setGame, playEffect]);
+	}, [setGame]);
 
 	const goNext = (result: "correct" | "pass", extraPenalty: number) => {
 		const isLast = game.index + 1 >= total;
@@ -177,8 +184,32 @@ const PuzzleScreen: React.FC<PuzzleScreenProps> = ({
 						borderRadius: 999,
 						bgcolor: "rgba(0,0,0,0.25)",
 						border: "1px solid rgba(255,255,255,0.2)",
+						position: "relative",
 					}}
 				>
+					{/* ペナルティはタイマーの下に小さく表示し、問題は隠さない */}
+					{(effect?.kind === "hint" || effect?.kind === "pass") && (
+						<Typography
+							key={effect.id}
+							sx={{
+								position: "absolute",
+								top: 0,
+								bottom: 0,
+								right: "100%",
+								mr: 1,
+								display: "flex",
+								alignItems: "center",
+								fontWeight: 900,
+								fontSize: "0.95rem",
+								color: effect.kind === "pass" ? "#fca5a5" : "#fcd34d",
+								pointerEvents: "none",
+								whiteSpace: "nowrap",
+								animation: `${penaltyFloat} ${EFFECT_DURATIONS[effect.kind]}ms ease-out both`,
+							}}
+						>
+							{effect.kind === "pass" ? "+3:00" : "+1:00"}
+						</Typography>
+					)}
 					<AccessTimeIcon fontSize="small" />
 					<Stopwatch
 						startedAt={game.startedAt}
