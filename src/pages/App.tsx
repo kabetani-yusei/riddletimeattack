@@ -44,6 +44,11 @@ const App: React.FC = () => {
 		"",
 		"local",
 	);
+	// ランキング参加モードは毎回オン（名前あり）から始め、リロード時のみ保持する
+	const [rankedMode, setRankedMode] = usePersistentState(
+		"rta:rankedMode",
+		true,
+	);
 	const [homeTab, setHomeTab] = usePersistentState("rta:homeTab", 0);
 	const [rankingSet, setRankingSet] = usePersistentState<RiddleSetKey>(
 		"rta:rankingSet",
@@ -139,6 +144,8 @@ const App: React.FC = () => {
 					setRankingSet={setRankingSet}
 					userName={userName}
 					setUserName={setUserName}
+					rankedMode={rankedMode}
+					setRankedMode={setRankedMode}
 					onStart={handleStart}
 					ranking={ranking}
 				/>
